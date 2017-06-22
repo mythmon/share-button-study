@@ -12,12 +12,6 @@ let share_button;
 let url_input;
 let url_input_controllers;
 
-function url_input_button_key_listener(e) {
-    let copy_modifier = AppConstants.platform === "macosx" ? e.metaKey : e.ctrlKey;
-    if (copy_modifier && e.key === 'c') {
-        share_button.classList.add("social-share-button-on")
-    }
-}
 function share_button_animation_listener(e) {
     share_button.classList.remove("social-share-button-on");
 }
@@ -47,7 +41,7 @@ const url_input_controller = {
             }
         }
     },
-    onEvent : function(e){ }
+    onEvent : function(e) {}
 };
 
 function install(data, reason) {}
@@ -62,15 +56,15 @@ function startup(data, reason) {
     utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
 
     let url_bar = b_document.getElementById("urlbar");
+    // XUL elements are different than regular children
     url_input = b_document.getAnonymousElementByAttribute(url_bar, "anonid", "input");
-
-    url_input.addEventListener('keydown', url_input_button_key_listener);
 
     // store controllers so that our controller can inherit cmd_copy from
     // the actual controller
     url_input_controllers = url_input.controllers;
     url_input_controllers.insertControllerAt(0, url_input_controller);
 
+    // remove the social-share-button-on class when the animation ends
     share_button.addEventListener('animationend', share_button_animation_listener);
 }
 
@@ -79,7 +73,6 @@ function shutdown(data, reason) {
 
     share_button.classList.remove("social-share-button-on");
 
-    url_input.removeEventListener('keydown', url_input_button_key_listener);
     share_button.removeEventListener('animationend', share_button_animation_listener);
 
     url_input_controllers.removeController(url_input_controller);
