@@ -1,0 +1,4 @@
+bootstrap.js
+chrome.manifest
+install.rdf
+share_button.css

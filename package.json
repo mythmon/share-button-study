@@ -16,6 +16,6 @@
   },
   "scripts": {
     "lint": "eslint bootstrap.js",
-    "build": "zip -r share-button-study.xpi *"
+    "build": "./bin/make_xpi.sh"
   }
 }
