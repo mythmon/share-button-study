@@ -13,10 +13,14 @@ let url_input;
 let url_input_controllers;
 
 function share_button_animation_listener(e) {
+    // When the animation is done, we want to remove the CSS class
+    // so that we can add the class again upon the next copy and 
+    // replay the animation
     share_button.classList.remove("social-share-button-on");
 }
 
 const url_input_controller = {
+    // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Property/controllers
     supportsCommand : function(cmd){ return cmd === "cmd_copy"; },
     isCommandEnabled : function(cmd){ return true; },
     doCommand: function(cmd) {
@@ -50,21 +54,23 @@ function startup(data, reason) {
     b_window = Services.wm.getMostRecentWindow("navigator:browser");
     const b_document = b_window.document;
 
-    share_button = b_document.getElementById("social-share-button");
-
+    // Load the CSS with the share_button animation
     utils = b_window.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
     utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
 
+    // Get the "DOM" elements
+    share_button = b_document.getElementById("social-share-button");
     let url_bar = b_document.getElementById("urlbar");
     // XUL elements are different than regular children
     url_input = b_document.getAnonymousElementByAttribute(url_bar, "anonid", "input");
 
-    // store controllers so that our controller can inherit cmd_copy from
+    // Add the controller to intercept copy "event"
+    // Store controllers so that our controller can inherit cmd_copy from
     // the actual controller
     url_input_controllers = url_input.controllers;
     url_input_controllers.insertControllerAt(0, url_input_controller);
 
-    // remove the social-share-button-on class when the animation ends
+    // Add the event listener to remove the CSS class when the animation ends
     share_button.addEventListener('animationend', share_button_animation_listener);
 }
 
@@ -73,9 +79,9 @@ function shutdown(data, reason) {
 
     share_button.classList.remove("social-share-button-on");
 
-    share_button.removeEventListener('animationend', share_button_animation_listener);
-
     url_input_controllers.removeController(url_input_controller);
+
+    share_button.removeEventListener('animationend', share_button_animation_listener);
 }
 
 function uninstall(data, reason) {}
