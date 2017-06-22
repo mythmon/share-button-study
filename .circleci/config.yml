@@ -21,11 +21,11 @@ jobs:
 
       - run:
           name: Lint
-          command: npm lint
+          command: npm run lint
 
       - run:
           name: Build .XPI
-          command: npm build
+          command: npm run build
 
       - store_artifacts:
           path: "share-button-study.xpi"
