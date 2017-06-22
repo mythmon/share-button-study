@@ -28,4 +28,4 @@ jobs:
           command: npm build
 
       - store_artifacts:
-        path: "share-button-study.xpi"
+          path: "share-button-study.xpi"
