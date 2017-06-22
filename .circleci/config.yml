@@ -11,9 +11,9 @@ jobs:
 
       - run:
           name: dependencies
-          command:
-              - apt-get update
-              - apt-get install zip
+          command: |
+            apt-get update
+            apt-get install zip
 
       - restore_cache:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
