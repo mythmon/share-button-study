@@ -20,5 +20,12 @@ jobs:
             - "/home/ubuntu/.yarn-cache"
 
       - run:
-          name: ESLint
-          command: node_modules/.bin/eslint bootstrap.js
+          name: Lint
+          command: npm lint
+
+      - run:
+          name: Build .XPI
+          command: npm build
+
+      - store_artifacts:
+        path: "share-button-study.xpi"

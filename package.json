@@ -15,6 +15,7 @@
     "eslint-plugin-import": "^2.5.0"
   },
   "scripts": {
-    "test": "eslint bootstrap.js"
+    "lint": "eslint bootstrap.js",
+    "build": "zip -r share-button-study.xpi *"
   }
 }
