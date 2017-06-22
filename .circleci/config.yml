@@ -9,6 +9,10 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: dependencies
+          command: apt-get install zip
+
       - restore_cache:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
