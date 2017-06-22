@@ -1,0 +1,20 @@
+{
+  "name": "share-button-study",
+  "version": "1.0.0",
+  "description": "Extension that highlights the share button when text is copied from the URL bar.",
+  "main": "bootstrap.js",
+  "repository": "https://github.com/marcrowo/share-button-study.git",
+  "author": "Marc Robert Wong <marcrobertwong@gmail.com>",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "eslint-plugin-mozilla": "^0.3.4"
+  },
+  "devDependencies": {
+    "eslint": "^4.0.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-import": "^2.5.0"
+  },
+  "scripts": {
+    "test": "eslint bootstrap.js"
+  }
+}
