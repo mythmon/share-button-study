@@ -4,10 +4,11 @@ Cu.import("resource://gre/modules/Console.jsm");
 Cu.import("resource://gre/modules/AppConstants.jsm");
 
 const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
-let bWindow;
-let utils;
-let shareButton;
-let urlInputControllers;
+let bWindow = null;
+let bDocument = null;
+let utils = null;
+let shareButton = null;
+let urlInputControllers = null;
 
 function shareButtonAnimationListener(e) {
   // When the animation is done, we want to remove the CSS class
@@ -22,7 +23,12 @@ const urlInputController = {
   isCommandEnabled(cmd) { return true; },
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
-      shareButton.classList.add("social-share-button-on");
+      shareButton = bDocument.getElementById("social-share-button");
+      if (shareButton !== null) {
+        // add the event listener to remove the css class when the animation ends
+        shareButton.addEventListener("animationend", shareButtonAnimationListener);
+        shareButton.classList.add("social-share-button-on");
+      }
     }
     // Iterate over all other controllers and call doCommand on the first controller
     // that supports it
@@ -46,18 +52,8 @@ const urlInputController = {
   onEvent(e) {},
 };
 
-this.install = function(data, reason) {};
-
-this.startup = function(data, reason) {
-  bWindow = Services.wm.getMostRecentWindow("navigator:browser");
-  const bDocument = bWindow.document;
-
-  // Load the CSS with the shareButton animation
-  utils = bWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
-  utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
-
+function insertCopyController() {
   // Get the "DOM" elements
-  shareButton = bDocument.getElementById("social-share-button");
   const urlBar = bDocument.getElementById("urlbar");
   // XUL elements are different than regular children
   const urlInput = bDocument.getAnonymousElementByAttribute(urlBar, "anonid", "input");
@@ -67,21 +63,42 @@ this.startup = function(data, reason) {
   // the actual controller
   urlInputControllers = urlInput.controllers;
   urlInputControllers.insertControllerAt(0, urlInputController);
+}
 
-  // Add the event listener to remove the CSS class when the animation ends
-  shareButton.addEventListener("animationend", shareButtonAnimationListener);
+this.install = function(data, reason) {};
+
+this.startup = function(data, reason) {
+  bWindow = Services.wm.getMostRecentWindow("navigator:browser");
+  bDocument = bWindow.document;
+
+  // The customizationending event represents exiting the "Customize..." menu from the toolbar.
+  // We need to handle this event because after exiting the customization menu, the copy controller
+  // is removed and we can no longer detect text being copied from the URL bar.
+  // See https://dxr.mozilla.org/mozilla-central/rev/7a9536f89bc75b0672060f16ffbe6eb2c1ff3deb/browser/base/content/browser-customization.js#11
+  bWindow.addEventListener("customizationending", insertCopyController);
+
+  // Load the CSS with the shareButton animation
+  utils = bWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
+  utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
+
+  insertCopyController();
 };
 
 this.shutdown = function(data, reason) {
+  // Remove the customizationending listener
+  bWindow.removeEventListener("customizationending", insertCopyController);
+
   utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
 
-  if (shareButton) {
-    shareButton.classList.remove("social-share-button-on");
-  }
-
+  // Remove the copy controller
   urlInputControllers.removeController(urlInputController);
 
-  shareButton.removeEventListener("animationend", shareButtonAnimationListener);
+  // if null this means the user did not copy from the URL bar
+  // so we don't have anything to remove
+  if (shareButton !== null) {
+    shareButton.classList.remove("social-share-button-on");
+    shareButton.removeEventListener("animationend", shareButtonAnimationListener);
+  }
 };
 
 this.uninstall = function(data, reason) {};
