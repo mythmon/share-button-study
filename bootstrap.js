@@ -71,6 +71,7 @@ this.startup = function(data, reason) {
   bWindow = Services.wm.getMostRecentWindow("navigator:browser");
   bDocument = bWindow.document;
 
+  // See https://dxr.mozilla.org/mozilla-central/source/browser/base/content/browser-customization.js#11
   bWindow.addEventListener("customizationending", insertCopyController);
 
   // Load the CSS with the shareButton animation
