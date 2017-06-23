@@ -72,6 +72,8 @@ this.startup = function(data, reason) {
   bDocument = bWindow.document;
 
   // The customizationending event represents exiting the "Customize..." menu from the toolbar.
+  // We need to handle this event because after exiting the customization menu, the copy controller
+  // is removed and we can no longer detect text being copied from the URL bar.
   // See https://dxr.mozilla.org/mozilla-central/rev/7a9536f89bc75b0672060f16ffbe6eb2c1ff3deb/browser/base/content/browser-customization.js#11
   bWindow.addEventListener("customizationending", insertCopyController);
 
