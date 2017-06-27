@@ -30,18 +30,22 @@ class BrowserWindow {
     this.removeCustomizeListener = this.removeCustomizeListener.bind(this);
   }
 
+  getShareButton() {
+    this.shareButton = this.window.document.getElementById("social-share-button");
+  }
+
   setCopyController(copyController) {
     this.copyController = copyController;
   }
 
   insertCopyController() {
-    // refresh urlInput reference
+    // refresh urlInput reference, this is potentially changed by the customize event
     this.urlInput = getUrlInput(this.window);
     this.urlInput.controllers.insertControllerAt(0, this.copyController);
   }
 
   removeCopyController() {
-    // refresh urlInput reference
+    // refresh urlInput reference, this is potentially changed by the customize event
     this.urlInput = getUrlInput(this.window);
     this.urlInput.controllers.removeController(this.copyController);
   }
@@ -77,36 +81,39 @@ class BrowserWindow {
 class CopyController {
   // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Property/controllers
   constructor(browserWindow) {
-    this.shareButton = browserWindow.shareButton;
-    this.shareButtonListener = browserWindow.shareButtonListener;
-    this.urlInput = browserWindow.urlInput;
+    this.browserWindow = browserWindow;
   }
 
-  supportsCommand(cmd) { return cmd === "cmd_copy"}
+  supportsCommand(cmd) { return cmd === "cmd_copy"; }
 
   isCommandEnabled(cmd) { return true; }
 
   doCommand(cmd) {
+    console.log("intercepted cmd", cmd);
     if (cmd === "cmd_copy") {
-      if (this.shareButton !== null) {
+      this.browserWindow.getShareButton();
+      const shareButton = this.browserWindow.shareButton;
+      console.log(shareButton);
+      if (shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
-        this.shareButton.addEventListener("animationend", this.shareButtonListener);
-        this.shareButton.classList.add("social-share-button-on");
+        shareButton.addEventListener("animationend", this.browserWindow.shareButtonListener);
+        shareButton.classList.add("social-share-button-on");
       }
     }
     // Iterate over all other controllers and call doCommand on the first controller
     // that supports it
     // Skip until we reach the controller that we inserted
     let i = 0;
-    for (; i < this.urlInput.controllers.getControllerCount(); i++) {
-      const curController = this.urlInput.controllers.getControllerAt(i);
+    const urlInput = this.browserWindow.urlInput;
+    for (; i < urlInput.controllers.getControllerCount(); i++) {
+      const curController = urlInput.controllers.getControllerAt(i);
       if (curController === this) {
         i += 1;
         break;
       }
     }
-    for (; i < this.urlInput.controllers.getControllerCount(); i++) {
-      const curController = this.urlInput.controllers.getControllerAt(i);
+    for (; i < urlInput.controllers.getControllerCount(); i++) {
+      const curController = urlInput.controllers.getControllerAt(i);
       if (curController.supportsCommand(cmd)) {
         curController.doCommand(cmd);
         break;
