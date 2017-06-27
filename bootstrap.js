@@ -30,7 +30,7 @@ class BrowserWindow {
     this.removeCustomizeListener = this.removeCustomizeListener.bind(this);
   }
 
-  getShareButton() {
+  updateShareButton() {
     this.shareButton = this.window.document.getElementById("social-share-button");
   }
 
@@ -89,11 +89,9 @@ class CopyController {
   isCommandEnabled(cmd) { return true; }
 
   doCommand(cmd) {
-    console.log("intercepted cmd", cmd);
     if (cmd === "cmd_copy") {
-      this.browserWindow.getShareButton();
+      this.browserWindow.updateShareButton();
       const shareButton = this.browserWindow.shareButton;
-      console.log(shareButton);
       if (shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
         shareButton.addEventListener("animationend", this.browserWindow.shareButtonListener);
@@ -124,30 +122,58 @@ class CopyController {
   onEvent(e) {}
 }
 
+function injectExtension(aWindow) {
+  console.log(aWindow.document);
+
+  const browserWindow = new BrowserWindow(aWindow);
+  const copyController = new CopyController(browserWindow);
+
+  browserWindow.setCopyController(copyController);
+  browserWindowArray.push(browserWindow);
+
+  // The customizationending event represents exiting the "Customize..." menu from the toolbar.
+  // We need to handle this event because after exiting the customization menu, the copy
+  // controller is removed and we can no longer detect text being copied from the URL bar.
+  // See DXR:browser/base/content/browser-customization.js
+  browserWindow.addCustomizeListener();
+
+  // Load the CSS with the shareButton animation
+  browserWindow.insertCSS();
+
+  // insert the copy controller to detect copying from URL bar
+  browserWindow.insertCopyController();
+}
+
+// see https://dxr.mozilla.org/mozilla-central/rev/53477d584130945864c4491632f88da437353356/xpfe/appshell/nsIWindowMediatorListener.idl
+const WindowListener = {
+  onWindowTitleChange(window, title) { },
+  onOpenWindow(xulWindow) {
+    // FIXME window is of type nsIXULWindow, we want an nsIDOMWindow
+    // TODO Call injectExtension on the new nsIDOMWindow
+    // see https://dxr.mozilla.org/mozilla-central/rev/53477d584130945864c4491632f88da437353356/browser/base/content/test/general/browser_fullscreen-window-open.js#316
+    const domWindow = xulWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+      .getInterface(Ci.nsIDOMWindow);
+    const onWindowOpen = (e) => {
+      injectExtension(domWindow);
+    };
+    domWindow.addEventListener("load", onWindowOpen, true);
+  },
+  onCloseWindow(window) { },
+};
+
 this.install = function(data, reason) {};
 
 this.startup = function(data, reason) {
+  // iterate over all open windows
   const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (aWindowEnumerator.hasMoreElements()) {
     const aWindow = aWindowEnumerator.getNext();
 
-    const browserWindow = new BrowserWindow(aWindow);
-    const copyController = new CopyController(browserWindow);
-    browserWindow.setCopyController(copyController);
-    browserWindowArray.push(browserWindow);
-
-    // The customizationending event represents exiting the "Customize..." menu from the toolbar.
-    // We need to handle this event because after exiting the customization menu, the copy
-    // controller is removed and we can no longer detect text being copied from the URL bar.
-    // See DXR:browser/base/content/browser-customization.js
-    browserWindow.addCustomizeListener();
-
-    // Load the CSS with the shareButton animation
-    browserWindow.insertCSS();
-
-    // insert the copy controller to detect copying from URL bar
-    browserWindow.insertCopyController();
+    injectExtension(aWindow);
   }
+
+  // add an event listener for new windows
+  Services.wm.addListener(WindowListener);
 };
 
 this.shutdown = function(data, reason) {
