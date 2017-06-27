@@ -4,100 +4,176 @@ Cu.import("resource://gre/modules/Console.jsm");
 Cu.import("resource://gre/modules/AppConstants.jsm");
 
 const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
-let bWindow = null;
-let bDocument = null;
-let utils = null;
-let shareButton = null;
-let urlInputControllers = null;
+const browserWindowArray = [];
 
-function shareButtonAnimationListener(e) {
-  // When the animation is done, we want to remove the CSS class
-  // so that we can add the class again upon the next copy and
-  // replay the animation
-  shareButton.classList.remove("social-share-button-on");
+function getUrlInput(bWindow) {
+  // Get the "DOM" elements
+  const urlBar = bWindow.document.getElementById("urlbar");
+  // XUL elements are different than regular children
+  const urlInput = bWindow.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
+  return urlInput;
 }
 
-const urlInputController = {
+class BrowserWindow {
+  constructor(aWindow) {
+    this.window = aWindow;
+    this.urlInput = getUrlInput(this.window);
+    this.shareButton = this.window.document.getElementById("social-share-button");
+
+    // bind functions that are called externally so that `this` will work
+    this.shareButtonListener = this.shareButtonListener.bind(this);
+
+    this.insertCopyController = this.insertCopyController.bind(this);
+    this.removeCopyController = this.removeCopyController.bind(this);
+
+    this.addCustomizeListener = this.addCustomizeListener.bind(this);
+    this.removeCustomizeListener = this.removeCustomizeListener.bind(this);
+  }
+
+  setCopyController(copyController) {
+    this.copyController = copyController;
+  }
+
+  insertCopyController() {
+    console.log("copyController = ", this.copyController);
+    this.urlInput = getUrlInput(this.window);
+    console.log("insertCopyController pre", this.urlInput.controllers.getControllerCount());
+
+    this.urlInput.controllers.insertControllerAt(0, this.copyController);
+
+    console.log("insertCopyController post", this.urlInput.controllers.getControllerCount());
+  }
+
+  removeCopyController() {
+    console.log("removeCopyController pre", this.urlInput.controllers.getControllerCount());
+
+    this.urlInput = getUrlInput(this.window);
+    this.urlInput.controllers.removeController(this.copyController);
+
+    console.log("removeCopyController post", this.urlInput.controllers.getControllerCount());
+  }
+
+  shareButtonListener(e) {
+    // When the animation is done, we want to remove the CSS class
+    // so that we can add the class again upon the next copy and
+    // replay the animation
+    console.log("share button animation ended");
+    this.shareButton.classList.remove("social-share-button-on");
+  }
+
+  addCustomizeListener() {
+    this.window.addEventListener("customizationending", this.insertCopyController);
+  }
+
+  removeCustomizeListener() {
+    this.window.removeEventListener("customizationending", this.insertCopyController);
+  }
+
+  insertCSS() {
+    const utils = this.window.QueryInterface(Ci.nsIInterfaceRequestor)
+      .getInterface(Ci.nsIDOMWindowUtils);
+    utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
+  }
+
+  removeCSS() {
+    const utils = this.window.QueryInterface(Ci.nsIInterfaceRequestor)
+      .getInterface(Ci.nsIDOMWindowUtils);
+    utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
+  }
+}
+
+class CopyController {
   // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Property/controllers
-  supportsCommand(cmd) { return cmd === "cmd_copy"; },
-  isCommandEnabled(cmd) { return true; },
+  constructor(browserWindow) {
+    this.shareButton = browserWindow.shareButton;
+    this.shareButtonListener = browserWindow.shareButtonListener;
+    this.urlInput = browserWindow.urlInput;
+  }
+
+  thisIsMyController() {}
+
+  supportsCommand(cmd) { return cmd === "cmd_copy"}
+
+  isCommandEnabled(cmd) { return true; }
+
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
-      shareButton = bDocument.getElementById("social-share-button");
-      if (shareButton !== null) {
+      console.log("doCommand sharebutton = ", this.shareButton);
+
+      if (this.shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
-        shareButton.addEventListener("animationend", shareButtonAnimationListener);
-        shareButton.classList.add("social-share-button-on");
+        console.log("doCommand", cmd);
+        this.shareButton.addEventListener("animationend", this.shareButtonListener);
+        this.shareButton.classList.add("social-share-button-on");
       }
     }
     // Iterate over all other controllers and call doCommand on the first controller
     // that supports it
     // Skip until we reach the controller that we inserted
     let i = 0;
-    for (i < urlInputControllers.getControllerCount(); i++;) {
-      const curController = urlInputControllers.getControllerAt(i);
-      if (curController === urlInputController) {
+    for (; i < this.urlInput.controllers.getControllerCount(); i++) {
+      const curController = this.urlInput.controllers.getControllerAt(i);
+      if (curController === this) {
         i += 1;
         break;
       }
     }
-    for (i < urlInputControllers.getControllerCount(); i++;) {
-      const curController = urlInputControllers.getControllerAt(i);
+    for (; i < this.urlInput.controllers.getControllerCount(); i++) {
+      const curController = this.urlInput.controllers.getControllerAt(i);
       if (curController.supportsCommand(cmd)) {
         curController.doCommand(cmd);
         break;
       }
     }
-  },
-  onEvent(e) {},
-};
+  }
 
-function insertCopyController() {
-  // Get the "DOM" elements
-  const urlBar = bDocument.getElementById("urlbar");
-  // XUL elements are different than regular children
-  const urlInput = bDocument.getAnonymousElementByAttribute(urlBar, "anonid", "input");
-
-  // Add the controller to intercept copy "event"
-  // Store controllers so that our controller can inherit cmd_copy from
-  // the actual controller
-  urlInputControllers = urlInput.controllers;
-  urlInputControllers.insertControllerAt(0, urlInputController);
+  onEvent(e) {}
 }
 
 this.install = function(data, reason) {};
 
 this.startup = function(data, reason) {
-  bWindow = Services.wm.getMostRecentWindow("navigator:browser");
-  bDocument = bWindow.document;
+  const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
+  while (aWindowEnumerator.hasMoreElements()) {
+    const aWindow = aWindowEnumerator.getNext();
 
-  // The customizationending event represents exiting the "Customize..." menu from the toolbar.
-  // We need to handle this event because after exiting the customization menu, the copy controller
-  // is removed and we can no longer detect text being copied from the URL bar.
-  // See https://dxr.mozilla.org/mozilla-central/rev/7a9536f89bc75b0672060f16ffbe6eb2c1ff3deb/browser/base/content/browser-customization.js#11
-  bWindow.addEventListener("customizationending", insertCopyController);
+    const browserWindow = new BrowserWindow(aWindow);
+    const copyController = new CopyController(browserWindow);
+    browserWindow.setCopyController(copyController);
+    browserWindowArray.push(browserWindow);
 
-  // Load the CSS with the shareButton animation
-  utils = bWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindowUtils);
-  utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
+    // The customizationending event represents exiting the "Customize..." menu from the toolbar.
+    // We need to handle this event because after exiting the customization menu, the copy
+    // controller is removed and we can no longer detect text being copied from the URL bar.
+    // See DXR:browser/base/content/browser-customization.js
+    browserWindow.addCustomizeListener();
 
-  insertCopyController();
+    // Load the CSS with the shareButton animation
+    browserWindow.insertCSS();
+
+    // insert the copy controller to detect copying from URL bar
+    browserWindow.insertCopyController();
+  }
 };
 
 this.shutdown = function(data, reason) {
-  // Remove the customizationending listener
-  bWindow.removeEventListener("customizationending", insertCopyController);
+  for (let browserWindow of browserWindowArray) {
+    // Remove the customizationending listener
+    browserWindow.removeCustomizeListener();
 
-  utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
+    // Remove the CSS
+    browserWindow.removeCSS();
 
-  // Remove the copy controller
-  urlInputControllers.removeController(urlInputController);
+    // Remove the copy controller
+    browserWindow.removeCopyController();
 
-  // if null this means the user did not copy from the URL bar
-  // so we don't have anything to remove
-  if (shareButton !== null) {
-    shareButton.classList.remove("social-share-button-on");
-    shareButton.removeEventListener("animationend", shareButtonAnimationListener);
+    // Remove modifications to shareButton (modified in CopyController)
+    if (browserWindow.shareButton !== null) {
+      // if null this means the user did not copy from the URL bar
+      // so we don't have anything to remove
+      browserWindow.shareButton.classList.remove("social-share-button-on");
+      browserWindow.shareButton.removeEventListener("animationend", browserWindow.shareButtonListener);
+    }
   }
 };
 
