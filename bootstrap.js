@@ -84,7 +84,7 @@ class CopyController {
     this.browserWindow = browserWindow;
   }
 
-  supportsCommand(cmd) { return cmd === "cmd_copy"; }
+  supportsCommand(cmd) { return cmd === "cmd_copy" || cmd === "share-button-study"; }
 
   isCommandEnabled(cmd) { return true; }
 
@@ -103,9 +103,10 @@ class CopyController {
     // Skip until we reach the controller that we inserted
     let i = 0;
     const urlInput = this.browserWindow.urlInput;
+
     for (; i < urlInput.controllers.getControllerCount(); i++) {
       const curController = urlInput.controllers.getControllerAt(i);
-      if (curController === this) {
+      if (curController.supportsCommand("share-button-study")) {
         i += 1;
         break;
       }
@@ -123,7 +124,6 @@ class CopyController {
 }
 
 function injectExtension(aWindow) {
-  console.log("Inject extension DOM window", aWindow);
   const browserWindow = new BrowserWindow(aWindow);
   const copyController = new CopyController(browserWindow);
 
@@ -157,7 +157,6 @@ const windowListener = {
     // once the window is loaded / ready
     const onWindowOpen = (e) => {
       domWindow.removeEventListener("load", this);
-      console.log("WindowListener DOM Window", domWindow);
       injectExtension(domWindow);
     };
 
