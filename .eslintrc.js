@@ -8,6 +8,6 @@ module.exports = {
     "rules": {
         "no-plusplus": "off",
         "func-names": "off",
-        "class-methods-use-this": [2, {"exceptMethods": ["supportsCommand", "isCommandEnabled", "doCommand", "onEvent"]}]
+        "class-methods-use-this": "off"
     }
 };
