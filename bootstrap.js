@@ -4,7 +4,7 @@ Cu.import("resource://gre/modules/Console.jsm");
 Cu.import("resource://gre/modules/AppConstants.jsm");
 
 const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
-const browserWindowArray = [];
+const browserWindowWeakMap = new WeakMap();
 
 function getUrlInput(bWindow) {
   // Get the "DOM" elements
@@ -123,13 +123,12 @@ class CopyController {
 }
 
 function injectExtension(aWindow) {
-  console.log(aWindow.document);
-
+  console.log("Inject extension DOM window", aWindow);
   const browserWindow = new BrowserWindow(aWindow);
   const copyController = new CopyController(browserWindow);
 
   browserWindow.setCopyController(copyController);
-  browserWindowArray.push(browserWindow);
+  browserWindowWeakMap.set(aWindow, browserWindow);
 
   // The customizationending event represents exiting the "Customize..." menu from the toolbar.
   // We need to handle this event because after exiting the customization menu, the copy
@@ -145,17 +144,23 @@ function injectExtension(aWindow) {
 }
 
 // see https://dxr.mozilla.org/mozilla-central/rev/53477d584130945864c4491632f88da437353356/xpfe/appshell/nsIWindowMediatorListener.idl
-const WindowListener = {
+const windowListener = {
   onWindowTitleChange(window, title) { },
   onOpenWindow(xulWindow) {
-    // FIXME window is of type nsIXULWindow, we want an nsIDOMWindow
-    // TODO Call injectExtension on the new nsIDOMWindow
+    // xulWindow is of type nsIXULWindow, we want an nsIDOMWindow
     // see https://dxr.mozilla.org/mozilla-central/rev/53477d584130945864c4491632f88da437353356/browser/base/content/test/general/browser_fullscreen-window-open.js#316
+    // for how to change XUL into DOM
     const domWindow = xulWindow.QueryInterface(Ci.nsIInterfaceRequestor)
       .getInterface(Ci.nsIDOMWindow);
+
+    // we need to use a listener function so that it's injected
+    // once the window is loaded / ready
     const onWindowOpen = (e) => {
+      domWindow.removeEventListener("load", this);
+      console.log("WindowListener DOM Window", domWindow);
       injectExtension(domWindow);
     };
+
     domWindow.addEventListener("load", onWindowOpen, true);
   },
   onCloseWindow(window) { },
@@ -168,16 +173,18 @@ this.startup = function(data, reason) {
   const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (aWindowEnumerator.hasMoreElements()) {
     const aWindow = aWindowEnumerator.getNext();
-
     injectExtension(aWindow);
   }
 
   // add an event listener for new windows
-  Services.wm.addListener(WindowListener);
+  Services.wm.addListener(windowListener);
 };
 
 this.shutdown = function(data, reason) {
-  for (let browserWindow of browserWindowArray) {
+  const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
+  while (aWindowEnumerator.hasMoreElements()) {
+    const aWindow = aWindowEnumerator.getNext();
+    const browserWindow = browserWindowWeakMap.get(aWindow);
     // Remove the customizationending listener
     browserWindow.removeCustomizeListener();
 
@@ -195,6 +202,9 @@ this.shutdown = function(data, reason) {
       browserWindow.shareButton.removeEventListener("animationend", browserWindow.shareButtonListener);
     }
   }
+
+  // remove event listener for new windows
+  Services.wm.removeListener(windowListener);
 };
 
 this.uninstall = function(data, reason) {};
