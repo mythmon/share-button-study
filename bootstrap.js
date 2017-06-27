@@ -35,29 +35,21 @@ class BrowserWindow {
   }
 
   insertCopyController() {
-    console.log("copyController = ", this.copyController);
+    // refresh urlInput reference
     this.urlInput = getUrlInput(this.window);
-    console.log("insertCopyController pre", this.urlInput.controllers.getControllerCount());
-
     this.urlInput.controllers.insertControllerAt(0, this.copyController);
-
-    console.log("insertCopyController post", this.urlInput.controllers.getControllerCount());
   }
 
   removeCopyController() {
-    console.log("removeCopyController pre", this.urlInput.controllers.getControllerCount());
-
+    // refresh urlInput reference
     this.urlInput = getUrlInput(this.window);
     this.urlInput.controllers.removeController(this.copyController);
-
-    console.log("removeCopyController post", this.urlInput.controllers.getControllerCount());
   }
 
   shareButtonListener(e) {
     // When the animation is done, we want to remove the CSS class
     // so that we can add the class again upon the next copy and
     // replay the animation
-    console.log("share button animation ended");
     this.shareButton.classList.remove("social-share-button-on");
   }
 
@@ -90,19 +82,14 @@ class CopyController {
     this.urlInput = browserWindow.urlInput;
   }
 
-  thisIsMyController() {}
-
   supportsCommand(cmd) { return cmd === "cmd_copy"}
 
   isCommandEnabled(cmd) { return true; }
 
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
-      console.log("doCommand sharebutton = ", this.shareButton);
-
       if (this.shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
-        console.log("doCommand", cmd);
         this.shareButton.addEventListener("animationend", this.shareButtonListener);
         this.shareButton.classList.add("social-share-button-on");
       }
