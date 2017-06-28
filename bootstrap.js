@@ -112,24 +112,42 @@ class BrowserWindow {
       .getInterface(Ci.nsIDOMWindowUtils);
     utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
   }
-}
 
+  // TODO Add startup and shutdown functions.
+  startup() {
+    browserWindowWeakMap.set(this.window, this);
 
-function setupWindow(window) {
-  const browserWindow = new BrowserWindow(window);
-  browserWindowWeakMap.set(window, browserWindow);
+    // The customizationending event represents exiting the "Customize..." menu from the toolbar.
+    // We need to handle this event because after exiting the customization menu, the copy
+    // controller is removed and we can no longer detect text being copied from the URL bar.
+    // See DXR:browser/base/content/browser-customization.js
+    this.addCustomizeListener();
 
-  // The customizationending event represents exiting the "Customize..." menu from the toolbar.
-  // We need to handle this event because after exiting the customization menu, the copy
-  // controller is removed and we can no longer detect text being copied from the URL bar.
-  // See DXR:browser/base/content/browser-customization.js
-  browserWindow.addCustomizeListener();
+    // Load the CSS with the shareButton animation
+    this.insertCSS();
 
-  // Load the CSS with the shareButton animation
-  browserWindow.insertCSS();
+    // insert the copy controller to detect copying from URL bar
+    this.insertCopyController();
+  }
 
-  // insert the copy controller to detect copying from URL bar
-  browserWindow.insertCopyController();
+  shutdown() {
+    // Remove the customizationending listener
+    this.removeCustomizeListener();
+
+    // Remove the CSS
+    this.removeCSS();
+
+    // Remove the copy controller
+    this.removeCopyController();
+
+    // Remove modifications to shareButton (modified in CopyController)
+    if (this.shareButton !== null) {
+      // if null this means the user did not copy from the URL bar
+      // so we don't have anything to remove
+      this.shareButton.classList.remove("social-share-button-on");
+      this.shareButton.removeEventListener("animationend", this.animationEndListener);
+    }
+  }
 }
 
 // see https://dxr.mozilla.org/mozilla-central/rev/53477d584130945864c4491632f88da437353356/xpfe/appshell/nsIWindowMediatorListener.idl
@@ -146,7 +164,8 @@ const windowListener = {
     // once the window is loaded / ready
     const onWindowOpen = (e) => {
       domWindow.removeEventListener("load", onWindowOpen);
-      setupWindow(domWindow);
+      const browserWindow = new BrowserWindow(domWindow);
+      browserWindow.startup();
     };
 
     domWindow.addEventListener("load", onWindowOpen, true);
@@ -161,7 +180,8 @@ this.startup = function(data, reason) {
   const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (windowEnumerator.hasMoreElements()) {
     const window = windowEnumerator.getNext();
-    setupWindow(window);
+    const browserWindow = new BrowserWindow(window);
+    browserWindow.startup();
   }
 
   // add an event listener for new windows
@@ -173,22 +193,7 @@ this.shutdown = function(data, reason) {
   while (windowEnumerator.hasMoreElements()) {
     const window = windowEnumerator.getNext();
     const browserWindow = browserWindowWeakMap.get(window);
-    // Remove the customizationending listener
-    browserWindow.removeCustomizeListener();
-
-    // Remove the CSS
-    browserWindow.removeCSS();
-
-    // Remove the copy controller
-    browserWindow.removeCopyController();
-
-    // Remove modifications to shareButton (modified in CopyController)
-    if (browserWindow.shareButton !== null) {
-      // if null this means the user did not copy from the URL bar
-      // so we don't have anything to remove
-      browserWindow.shareButton.classList.remove("social-share-button-on");
-      browserWindow.shareButton.removeEventListener("animationend", browserWindow.animationEndListener);
-    }
+    browserWindow.shutdown();
   }
 
   // remove event listener for new windows
