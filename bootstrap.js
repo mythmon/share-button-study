@@ -141,7 +141,7 @@ class BrowserWindow {
 
     // Remove modifications to shareButton (modified in CopyController)
     if (this.shareButton !== null) {
-      // if null this means the user did not copy from the URL bar
+      // if null this means there is no shareButton on the page
       // so we don't have anything to remove
       this.shareButton.classList.remove("social-share-button-on");
       this.shareButton.removeEventListener("animationend", this.animationEndListener);
