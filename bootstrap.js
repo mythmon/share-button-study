@@ -12,10 +12,8 @@ class BrowserWindow {
 
     // bind functions that are called externally so that `this` will work
     this.shareButtonListener = this.shareButtonListener.bind(this);
-
     this.insertCopyController = this.insertCopyController.bind(this);
     this.removeCopyController = this.removeCopyController.bind(this);
-
     this.addCustomizeListener = this.addCustomizeListener.bind(this);
     this.removeCustomizeListener = this.removeCustomizeListener.bind(this);
   }
