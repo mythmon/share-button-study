@@ -188,15 +188,18 @@ this.startup = function(data, reason) {
 };
 
 this.shutdown = function(data, reason) {
+  // remove event listener for new windows before processing WeakMap
+  // to avoid race conditions
+  Services.wm.removeListener(windowListener);
+
   const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (windowEnumerator.hasMoreElements()) {
     const window = windowEnumerator.getNext();
-    const browserWindow = browserWindowWeakMap.get(window);
-    browserWindow.shutdown();
+    if (browserWindowWeakMap.has(window)) {
+      const browserWindow = browserWindowWeakMap.get(window);
+      browserWindow.shutdown();
+    }
   }
-
-  // remove event listener for new windows
-  Services.wm.removeListener(windowListener);
 };
 
 this.uninstall = function(data, reason) {};
