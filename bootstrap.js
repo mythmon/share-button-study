@@ -113,7 +113,6 @@ class BrowserWindow {
     utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
   }
 
-  // TODO Add startup and shutdown functions.
   startup() {
     browserWindowWeakMap.set(this.window, this);
 
