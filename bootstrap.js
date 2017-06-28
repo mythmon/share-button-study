@@ -6,19 +6,9 @@ Cu.import("resource://gre/modules/AppConstants.jsm");
 const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
 const browserWindowWeakMap = new WeakMap();
 
-function getUrlInput(window) {
-  // Get the "DOM" elements
-  const urlBar = window.document.getElementById("urlbar");
-  // XUL elements are different than regular children
-  const urlInput = window.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
-  return urlInput;
-}
-
 class BrowserWindow {
   constructor(window) {
     this.window = window;
-    this.urlInput = getUrlInput(this.window);
-    this.shareButton = this.window.document.getElementById("social-share-button");
 
     // bind functions that are called externally so that `this` will work
     this.shareButtonListener = this.shareButtonListener.bind(this);
@@ -30,8 +20,15 @@ class BrowserWindow {
     this.removeCustomizeListener = this.removeCustomizeListener.bind(this);
   }
 
-  updateShareButton() {
-    this.shareButton = this.window.document.getElementById("social-share-button");
+  get urlInput() {
+    // Get the "DOM" elements
+    const urlBar = window.document.getElementById("urlbar");
+    // XUL elements are different than regular children
+    return window.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
+  }
+
+  get shareButton() {
+    return this.window.document.getElementById("social-share-button");
   }
 
   setCopyController(copyController) {
@@ -40,13 +37,11 @@ class BrowserWindow {
 
   insertCopyController() {
     // refresh urlInput reference, this is potentially changed by the customize event
-    this.urlInput = getUrlInput(this.window);
     this.urlInput.controllers.insertControllerAt(0, this.copyController);
   }
 
   removeCopyController() {
     // refresh urlInput reference, this is potentially changed by the customize event
-    this.urlInput = getUrlInput(this.window);
     this.urlInput.controllers.removeController(this.copyController);
   }
 
