@@ -115,7 +115,7 @@ class BrowserWindow {
 }
 
 
-function injectExtension(window) {
+function setupWindow(window) {
   const browserWindow = new BrowserWindow(window);
   browserWindowWeakMap.set(window, browserWindow);
 
@@ -146,7 +146,7 @@ const windowListener = {
     // once the window is loaded / ready
     const onWindowOpen = (e) => {
       domWindow.removeEventListener("load", this);
-      injectExtension(domWindow);
+      setupWindow(domWindow);
     };
 
     domWindow.addEventListener("load", onWindowOpen, true);
@@ -161,7 +161,7 @@ this.startup = function(data, reason) {
   const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
   while (windowEnumerator.hasMoreElements()) {
     const window = windowEnumerator.getNext();
-    injectExtension(window);
+    setupWindow(window);
   }
 
   // add an event listener for new windows
