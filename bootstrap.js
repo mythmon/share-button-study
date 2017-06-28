@@ -145,7 +145,7 @@ const windowListener = {
     // we need to use a listener function so that it's injected
     // once the window is loaded / ready
     const onWindowOpen = (e) => {
-      domWindow.removeEventListener("load", this);
+      domWindow.removeEventListener("load", onWindowOpen);
       setupWindow(domWindow);
     };
 
