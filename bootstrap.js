@@ -6,17 +6,17 @@ Cu.import("resource://gre/modules/AppConstants.jsm");
 const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
 const browserWindowWeakMap = new WeakMap();
 
-function getUrlInput(bWindow) {
+function getUrlInput(window) {
   // Get the "DOM" elements
-  const urlBar = bWindow.document.getElementById("urlbar");
+  const urlBar = window.document.getElementById("urlbar");
   // XUL elements are different than regular children
-  const urlInput = bWindow.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
+  const urlInput = window.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
   return urlInput;
 }
 
 class BrowserWindow {
-  constructor(aWindow) {
-    this.window = aWindow;
+  constructor(window) {
+    this.window = window;
     this.urlInput = getUrlInput(this.window);
     this.shareButton = this.window.document.getElementById("social-share-button");
 
@@ -123,12 +123,12 @@ class CopyController {
   onEvent(e) {}
 }
 
-function injectExtension(aWindow) {
-  const browserWindow = new BrowserWindow(aWindow);
+function injectExtension(window) {
+  const browserWindow = new BrowserWindow(window);
   const copyController = new CopyController(browserWindow);
 
   browserWindow.setCopyController(copyController);
-  browserWindowWeakMap.set(aWindow, browserWindow);
+  browserWindowWeakMap.set(window, browserWindow);
 
   // The customizationending event represents exiting the "Customize..." menu from the toolbar.
   // We need to handle this event because after exiting the customization menu, the copy
@@ -169,10 +169,10 @@ this.install = function(data, reason) {};
 
 this.startup = function(data, reason) {
   // iterate over all open windows
-  const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
-  while (aWindowEnumerator.hasMoreElements()) {
-    const aWindow = aWindowEnumerator.getNext();
-    injectExtension(aWindow);
+  const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
+  while (windowEnumerator.hasMoreElements()) {
+    const window = windowEnumerator.getNext();
+    injectExtension(window);
   }
 
   // add an event listener for new windows
@@ -180,10 +180,10 @@ this.startup = function(data, reason) {
 };
 
 this.shutdown = function(data, reason) {
-  const aWindowEnumerator = Services.wm.getEnumerator("navigator:browser");
-  while (aWindowEnumerator.hasMoreElements()) {
-    const aWindow = aWindowEnumerator.getNext();
-    const browserWindow = browserWindowWeakMap.get(aWindow);
+  const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
+  while (windowEnumerator.hasMoreElements()) {
+    const window = windowEnumerator.getNext();
+    const browserWindow = browserWindowWeakMap.get(window);
     // Remove the customizationending listener
     browserWindow.removeCustomizeListener();
 
