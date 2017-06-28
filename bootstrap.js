@@ -83,7 +83,6 @@ class CopyController {
 
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
-      this.browserWindow.updateShareButton();
       const shareButton = this.browserWindow.shareButton;
       if (shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
