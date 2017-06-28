@@ -189,7 +189,7 @@ this.startup = function(data, reason) {
 
 this.shutdown = function(data, reason) {
   // remove event listener for new windows before processing WeakMap
-  // to avoid race conditions
+  // to avoid race conditions (ie. new window added during shutdown)
   Services.wm.removeListener(windowListener);
 
   const windowEnumerator = Services.wm.getEnumerator("navigator:browser");
