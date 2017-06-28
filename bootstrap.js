@@ -21,7 +21,7 @@ class CopyController {
       const shareButton = this.browserWindow.shareButton;
       if (shareButton !== null) {
         // add the event listener to remove the css class when the animation ends
-        shareButton.addEventListener("animationend", this.browserWindow.shareButtonListener);
+        shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
         shareButton.classList.add("social-share-button-on");
       }
     }
@@ -55,7 +55,7 @@ class BrowserWindow {
     this.window = window;
 
     // bind functions that are called externally so that `this` will work
-    this.shareButtonListener = this.shareButtonListener.bind(this);
+    this.animationEndListener = this.animationEndListener.bind(this);
     this.insertCopyController = this.insertCopyController.bind(this);
     this.removeCopyController = this.removeCopyController.bind(this);
     this.addCustomizeListener = this.addCustomizeListener.bind(this);
@@ -86,7 +86,7 @@ class BrowserWindow {
     this.urlInput.controllers.removeController(this.copyController);
   }
 
-  shareButtonListener(e) {
+  animationEndListener(e) {
     // When the animation is done, we want to remove the CSS class
     // so that we can add the class again upon the next copy and
     // replay the animation
@@ -187,7 +187,7 @@ this.shutdown = function(data, reason) {
       // if null this means the user did not copy from the URL bar
       // so we don't have anything to remove
       browserWindow.shareButton.classList.remove("social-share-button-on");
-      browserWindow.shareButton.removeEventListener("animationend", browserWindow.shareButtonListener);
+      browserWindow.shareButton.removeEventListener("animationend", browserWindow.animationEndListener);
     }
   }
 
