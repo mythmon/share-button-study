@@ -1,18 +1,17 @@
-"use strict";
-
 // The geckodriver package downloads and installs geckodriver for us.
 // We use it by requiring it.
-require("geckodriver");
-let cmd = require("selenium-webdriver/lib/command");
 
-let firefox = require("selenium-webdriver/firefox");
-let webdriver = require("selenium-webdriver");
-let FxRunnerUtils = require("fx-runner/lib/utils");
-let Fs = require("fs-promise");
-let By = webdriver.By;
-let Context = firefox.Context;
-let until = webdriver.until;
-let path = require("path");
+require("geckodriver");
+const cmd = require("selenium-webdriver/lib/command");
+const firefox = require("selenium-webdriver/firefox");
+const Fs = require("fs-promise");
+const FxRunnerUtils = require("fx-runner/lib/utils");
+const path = require("path");
+const webdriver = require("selenium-webdriver");
+
+const By = webdriver.By;
+const Context = firefox.Context;
+const until = webdriver.until;
 
 // Note: Geckodriver already has quite a good set of default preferences
 // for disabling various items.
@@ -25,15 +24,15 @@ const FIREFOX_PREFERENCES = {
   // These are good to have set up if you're debugging tests with the browser
   // toolbox.
   "devtools.chrome.enabled": true,
-  "devtools.debugger.remote-enabled": true
+  "devtools.debugger.remote-enabled": true,
 };
 
 function promiseActualBinary(binary) {
   return FxRunnerUtils.normalizeBinary(binary)
-    .then(binary => Fs.stat(binary).then(() => binary))
-    .catch(ex => {
+    .then(normalizedBinary => Fs.stat(normalizedBinary).then(() => normalizedBinary))
+    .catch((ex) => {
       if (ex.code === "ENOENT") {
-        throw new Error("Could not find ${binary}");
+        throw new Error(`Could not find ${binary}`);
       }
       throw ex;
     });
@@ -49,27 +48,26 @@ async function addShareButton(driver) {
 }
 
 async function installAddon(driver, fileLocation) {
-  let executor = driver.getExecutor();
-  executor.defineCommand("installAddon", "POST", "/session/:sessionId/moz/addon/install")
-  let installCmd = new cmd.Command("installAddon");
+  const executor = driver.getExecutor();
+  executor.defineCommand("installAddon", "POST", "/session/:sessionId/moz/addon/install");
+  const installCmd = new cmd.Command("installAddon");
 
-  let session = await driver.getSession();
-  installCmd.setParameters({sessionId: session.getId(), path: fileLocation, temporary: true})
+  const session = await driver.getSession();
+  installCmd.setParameters({ sessionId: session.getId(), path: fileLocation, temporary: true });
   await executor.execute(installCmd);
-  console.log("addon installed");
 }
 
-module.exports.promiseSetupDriver = async () => {
-  let profile = new firefox.Profile();
+module.exports.promiseSetupDriver = async() => {
+  const profile = new firefox.Profile();
 
-  Object.keys(FIREFOX_PREFERENCES).forEach(key => {
+  Object.keys(FIREFOX_PREFERENCES).forEach((key) => {
     profile.setPreference(key, FIREFOX_PREFERENCES[key]);
   });
 
-  let options = new firefox.Options();
+  const options = new firefox.Options();
   options.setProfile(profile);
 
-  let builder = new webdriver.Builder()
+  const builder = new webdriver.Builder()
     .forBrowser("firefox")
     .setFirefoxOptions(options);
 
@@ -81,7 +79,7 @@ module.exports.promiseSetupDriver = async () => {
   // add the share-button to the toolbar
   await addShareButton(driver);
 
-  let fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
+  const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
 
   // install the addon
   await installAddon(driver, fileLocation);
@@ -89,7 +87,7 @@ module.exports.promiseSetupDriver = async () => {
   return driver;
 };
 
-module.exports.promiseAddonButton = driver => {
+module.exports.promiseAddonButton = (driver) => {
   driver.setContext(Context.CHROME);
   return driver.wait(until.elementLocated(
     By.id("social-share-button")), 1000);
