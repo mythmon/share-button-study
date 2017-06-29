@@ -33,5 +33,9 @@ jobs:
           name: Build .XPI
           command: npm run build
 
+      - run:
+          name: Functional tests
+          command: npm run test
+
       - store_artifacts:
           path: "extension/share-button-study.xpi"
