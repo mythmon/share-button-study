@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: node:7.9.0
+      - image: ubuntu:17.10
 
     working_directory: ~/share-button-study
 
@@ -13,7 +13,9 @@ jobs:
           name: dependencies
           command: |
             apt-get update -y
-            apt-get install -y zip
+            apt-get install -y curl
+            curl -sL https://deb.nodesource.com/setup_8.x | bash -
+            apt-get install -y zip firefox xvfb nodejs
 
       - restore_cache:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
