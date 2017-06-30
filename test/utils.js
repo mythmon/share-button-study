@@ -7,7 +7,6 @@ const cmd = require("selenium-webdriver/lib/command");
 const firefox = require("selenium-webdriver/firefox");
 const Fs = require("fs-promise");
 const FxRunnerUtils = require("fx-runner/lib/utils");
-const path = require("path");
 const webdriver = require("selenium-webdriver");
 
 const By = webdriver.By;
@@ -28,27 +27,30 @@ const FIREFOX_PREFERENCES = {
   "devtools.debugger.remote-enabled": true,
 };
 
-function promiseActualBinary(binary) {
-  return FxRunnerUtils.normalizeBinary(binary)
-    .then(normalizedBinary => Fs.stat(normalizedBinary).then(() => normalizedBinary))
-    .catch((ex) => {
-      if (ex.code === "ENOENT") {
-        throw new Error(`Could not find ${binary}`);
-      }
-      throw ex;
-    });
+// useful if we need to test on a specific version of Firefox
+async function promiseActualBinary(binary) {
+  try {
+    const normalizedBinary = await FxRunnerUtils.normalizeBinary(binary);
+    await Fs.stat(normalizedBinary);
+    return normalizedBinary;
+  } catch (ex) {
+    if (ex.code === "ENOENT") {
+      throw new Error(`Could not find ${binary}`);
+    }
+    throw ex;
+  }
 }
 
-async function addShareButton(driver) {
+module.exports.addShareButton = async function addShareButton(driver) {
   await driver.executeAsyncScript((callback) => {
     // see https://dxr.mozilla.org/mozilla-central/source/browser/base/content/browser-social.js#193
     Components.utils.import("resource:///modules/CustomizableUI.jsm");
     CustomizableUI.addWidgetToArea("social-share-button", CustomizableUI.AREA_NAVBAR);
     callback();
   });
-}
+};
 
-async function installAddon(driver, fileLocation) {
+module.exports.installAddon = async function installAddon(driver, fileLocation) {
   // references:
   //    https://bugzilla.mozilla.org/show_bug.cgi?id=1298025
   //    https://github.com/mozilla/geckodriver/releases/tag/v0.17.0
@@ -59,7 +61,7 @@ async function installAddon(driver, fileLocation) {
   const session = await driver.getSession();
   installCmd.setParameters({ sessionId: session.getId(), path: fileLocation, temporary: true });
   await executor.execute(installCmd);
-}
+};
 
 module.exports.promiseSetupDriver = async() => {
   try {
@@ -80,15 +82,6 @@ module.exports.promiseSetupDriver = async() => {
     await options.setBinary(new firefox.Binary(binaryLocation));
     const driver = await builder.build();
     driver.setContext(Context.CHROME);
-
-    // add the share-button to the toolbar
-    await addShareButton(driver);
-
-    const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
-
-    // install the addon
-    await installAddon(driver, fileLocation);
-
     return driver;
   } catch (e) {
     throw new Error(e);

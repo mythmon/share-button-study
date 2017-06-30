@@ -2,6 +2,7 @@
 
 const assert = require("assert");
 const utils = require("./utils");
+const path = require("path");
 
 // TODO these may be useful for more complex tests
 // const firefox = require("selenium-webdriver/firefox");
@@ -25,6 +26,12 @@ describe("Example Add-on Functional Tests", function() {
   after(() => driver.quit());
 
   it("should have a toolbar button", async() => {
+    // add the share-button to the toolbar
+    await utils.addShareButton(driver);
+    // install the addon
+    const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
+    await utils.installAddon(driver, fileLocation);
+
     const button = await utils.promiseAddonButton(driver);
     const text = await button.getAttribute("tooltiptext");
     assert.equal(text, "Share this page");
