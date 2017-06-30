@@ -19,6 +19,8 @@ jobs:
             echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
             apt-get update -y
             apt-get install -y zip firefox xvfb nodejs yarn
+            Xvfb :10 -ac &
+            export DISPLAY=:10
 
       - restore_cache:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
