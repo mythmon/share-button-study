@@ -49,6 +49,9 @@ async function addShareButton(driver) {
 }
 
 async function installAddon(driver, fileLocation) {
+  // references:
+  //    https://bugzilla.mozilla.org/show_bug.cgi?id=1298025
+  //    https://github.com/mozilla/geckodriver/releases/tag/v0.17.0
   const executor = driver.getExecutor();
   executor.defineCommand("installAddon", "POST", "/session/:sessionId/moz/addon/install");
   const installCmd = new cmd.Command("installAddon");
