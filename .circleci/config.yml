@@ -18,7 +18,8 @@ jobs:
 
       - run:
           name: xvfb
-          command: Xvfb :10 -ac &
+          command: Xvfb :10 -ac
+          background: true
 
       - run: yarn install
 
