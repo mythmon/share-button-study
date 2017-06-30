@@ -2,6 +2,8 @@
 
 const assert = require("assert");
 const utils = require("./utils");
+
+// TODO these may be useful for more complex tests
 // const firefox = require("selenium-webdriver/firefox");
 // const Context = firefox.Context;
 
