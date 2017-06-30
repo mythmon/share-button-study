@@ -58,41 +58,38 @@ async function installAddon(driver, fileLocation) {
 }
 
 module.exports.promiseSetupDriver = async() => {
-  const profile = new firefox.Profile();
-
-  Object.keys(FIREFOX_PREFERENCES).forEach((key) => {
-    profile.setPreference(key, FIREFOX_PREFERENCES[key]);
-  });
-
-  const options = new firefox.Options();
-  options.setProfile(profile);
-
-  const builder = new webdriver.Builder()
-    .forBrowser("firefox")
-    .setFirefoxOptions(options);
-
-  const binaryLocation = await promiseActualBinary(process.env.FIREFOX_BINARY || "firefox");
-  await options.setBinary(new firefox.Binary(binaryLocation));
-  const driver = await builder.build();
-  driver.setContext(Context.CHROME);
-
-  // add the share-button to the toolbar
   try {
+    const profile = new firefox.Profile();
+
+    Object.keys(FIREFOX_PREFERENCES).forEach((key) => {
+      profile.setPreference(key, FIREFOX_PREFERENCES[key]);
+    });
+
+    const options = new firefox.Options();
+    options.setProfile(profile);
+
+    const builder = new webdriver.Builder()
+      .forBrowser("firefox")
+      .setFirefoxOptions(options);
+
+    const binaryLocation = await promiseActualBinary(process.env.FIREFOX_BINARY || "firefox");
+    await options.setBinary(new firefox.Binary(binaryLocation));
+    const driver = await builder.build();
+    driver.setContext(Context.CHROME);
+
+    // add the share-button to the toolbar
     await addShareButton(driver);
-  } catch (e) {
-    console.log(e);
-  }
 
-  const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
+    const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
 
-  // install the addon
-  try {
+    // install the addon
     await installAddon(driver, fileLocation);
+
+    return driver;
   } catch (e) {
     console.log(e);
+    return e;
   }
-
-  return driver;
 };
 
 module.exports.promiseAddonButton = (driver) => {
