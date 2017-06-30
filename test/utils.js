@@ -77,12 +77,20 @@ module.exports.promiseSetupDriver = async() => {
   driver.setContext(Context.CHROME);
 
   // add the share-button to the toolbar
-  await addShareButton(driver);
+  try {
+    await addShareButton(driver);
+  } catch (e) {
+    console.log(e);
+  }
 
   const fileLocation = path.join(process.cwd(), process.env.XPI_NAME);
 
   // install the addon
-  await installAddon(driver, fileLocation);
+  try {
+    await installAddon(driver, fileLocation);
+  } catch (e) {
+    console.log(e);
+  }
 
   return driver;
 };
