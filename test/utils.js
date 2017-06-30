@@ -1,3 +1,4 @@
+/* eslint-env node */
 // The geckodriver package downloads and installs geckodriver for us.
 // We use it by requiring it.
 
@@ -87,8 +88,7 @@ module.exports.promiseSetupDriver = async() => {
 
     return driver;
   } catch (e) {
-    console.log(e);
-    return e;
+    throw new Error(e);
   }
 };
 
