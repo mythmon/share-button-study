@@ -18,9 +18,7 @@ jobs:
 
       - run:
           name: xvfb
-          command: |
-            Xvfb :10 -ac &
-            export DISPLAY=:10
+          command: Xvfb :10 -ac &
 
       - run: yarn install
 
@@ -36,10 +34,12 @@ jobs:
       - run:
           name: Build .XPI
           command: npm run build
-
+  
       - run:
           name: Functional tests
-          command: npm run test
+          command: |
+            export DISPLAY=:10
+            npm run test
 
       - store_artifacts:
           path: "extension/share-button-study.xpi"
