@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: ubuntu:16.04
 
-    working_directory: ~/share-button-study
+    working_directory: /share-button-study
 
     steps:
       - checkout
