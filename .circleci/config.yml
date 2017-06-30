@@ -16,6 +16,12 @@ jobs:
             #- restore_cache:
             #key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
+      - run:
+          name: xvfb
+          command: |
+            Xvfb :10 -ac &
+            export DISPLAY=:10
+
       - run: yarn install
 
         #- save_cache:
