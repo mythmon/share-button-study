@@ -22,15 +22,15 @@ jobs:
             Xvfb :10 -ac &
             export DISPLAY=:10
 
-      - restore_cache:
-          key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            #- restore_cache:
+            #key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
       - run: yarn install
 
-      - save_cache:
-          key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
-          paths:
-            - "/home/ubuntu/.yarn-cache"
+        #- save_cache:
+        #  key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
+        #  paths:
+        #    - "/home/ubuntu/.yarn-cache"
 
       - run:
           name: Lint
