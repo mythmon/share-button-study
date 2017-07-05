@@ -19,7 +19,7 @@ class CopyController {
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
       const shareButton = this.browserWindow.shareButton;
-      if (shareButton !== null) {
+      if (shareButton !== null && shareButton.attributes.getNamedItem("disabled") === null) {
         // add the event listener to remove the css class when the animation ends
         shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
         shareButton.classList.add("social-share-button-on");
