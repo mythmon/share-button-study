@@ -12,7 +12,7 @@ const clipboardy = require("clipboardy");
 // TODO create new profile per test?
 // then we can test with a clean profile every time
 
-describe("Example Add-on Functional Tests", function() {
+describe("Add-on Functional Tests", function() {
   // This gives Firefox time to start, and us a bit longer during some of the tests.
   this.timeout(10000);
 
