@@ -7,6 +7,7 @@
   "author": "Marc Robert Wong <marcrobertwong@gmail.com>",
   "license": "MPL-2.0",
   "dependencies": {
+    "clipboardy": "^1.1.4",
     "eslint-plugin-mozilla": "^0.3.4",
     "fs-promise": "^2.0.3",
     "fx-runner": "^1.0.6",
