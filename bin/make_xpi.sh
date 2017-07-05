@@ -2,10 +2,9 @@
 
 set -eu
 
-BASE_DIR="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")"
+BASE_DIR="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")""/extension"
 TMP_DIR=$(mktemp -d)
 DEST="${TMP_DIR}/share-button-study"
-
 mkdir -p $DEST
 
 # deletes the temp directory

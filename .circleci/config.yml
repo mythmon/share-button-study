@@ -2,21 +2,24 @@ version: 2
 jobs:
   build:
     docker:
-      - image: node:7.9.0
+      - image: ubuntu:16.04
 
-    working_directory: ~/share-button-study
+    working_directory: /share-button-study
 
     steps:
       - checkout
 
       - run:
           name: dependencies
-          command: |
-            apt-get update -y
-            apt-get install -y zip
+          command: ./install.sh
 
       - restore_cache:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
+      - run:
+          name: xvfb
+          command: Xvfb :10 -ac
+          background: true
 
       - run: yarn install
 
@@ -32,6 +35,12 @@ jobs:
       - run:
           name: Build .XPI
           command: npm run build
+  
+      - run:
+          name: Functional tests
+          command: |
+            export DISPLAY=:10
+            npm run test
 
       - store_artifacts:
-          path: "share-button-study.xpi"
+          path: "extension/share-button-study.xpi"
