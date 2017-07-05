@@ -20,9 +20,7 @@ describe("Add-on Functional Tests", function() {
   let addonId;
 
   before(async() => {
-    const newDriver = await utils.promiseSetupDriver();
-    driver = newDriver;
-    return Promise.resolve();
+    driver = await utils.promiseSetupDriver();
   });
 
   after(() => driver.quit());

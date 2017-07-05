@@ -43,28 +43,24 @@ async function promiseActualBinary(binary) {
 }
 
 module.exports.promiseSetupDriver = async() => {
-  try {
-    const profile = new firefox.Profile();
+  const profile = new firefox.Profile();
 
-    Object.keys(FIREFOX_PREFERENCES).forEach((key) => {
-      profile.setPreference(key, FIREFOX_PREFERENCES[key]);
-    });
+  Object.keys(FIREFOX_PREFERENCES).forEach((key) => {
+    profile.setPreference(key, FIREFOX_PREFERENCES[key]);
+  });
 
-    const options = new firefox.Options();
-    options.setProfile(profile);
+  const options = new firefox.Options();
+  options.setProfile(profile);
 
-    const builder = new webdriver.Builder()
-      .forBrowser("firefox")
-      .setFirefoxOptions(options);
+  const builder = new webdriver.Builder()
+    .forBrowser("firefox")
+    .setFirefoxOptions(options);
 
-    const binaryLocation = await promiseActualBinary(process.env.FIREFOX_BINARY || "firefox");
-    await options.setBinary(new firefox.Binary(binaryLocation));
-    const driver = await builder.build();
-    driver.setContext(Context.CHROME);
-    return driver;
-  } catch (e) {
-    throw new Error(e);
-  }
+  const binaryLocation = await promiseActualBinary(process.env.FIREFOX_BINARY || "firefox");
+  await options.setBinary(new firefox.Binary(binaryLocation));
+  const driver = await builder.build();
+  driver.setContext(Context.CHROME);
+  return driver;
 };
 
 module.exports.addShareButton = async driver =>
