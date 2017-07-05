@@ -59,6 +59,8 @@ describe("Example Add-on Functional Tests", function() {
 
   it("should have copy trigger the animation", async() => {
     await utils.copyUrlBar(driver);
+    // wait for class to be added to button
+    await utils.waitForClassAdded(driver);
     const { hasClass, hasColor } = await utils.testAnimation(driver);
     assert(hasClass && hasColor);
     // wait for the animation to end so that subsequent tests are

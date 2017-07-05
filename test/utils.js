@@ -115,6 +115,7 @@ module.exports.copyUrlBar = async(driver) => {
   const urlBar = await module.exports.promiseUrlBar(driver);
   const testText = "about:test";
   await urlBar.sendKeys(testText);
+  // TODO OS-agnostic copy paste
   await urlBar.sendKeys(webdriver.Key.chord(webdriver.Key.COMMAND, "A"));
   await urlBar.sendKeys(webdriver.Key.chord(webdriver.Key.COMMAND, "C"));
 };
@@ -124,12 +125,19 @@ module.exports.testAnimation = async(driver) => {
 
   const buttonClassString = await button.getAttribute("class");
   const buttonColor = await button.getCssValue("background-color");
+  // TODO make more generic, use string.includes() instead
   const truncatedRGB = buttonColor.substring(5, 17);
 
   const hasClass = buttonClassString.split(" ").includes("social-share-button-on");
   const hasColor = truncatedRGB === "43, 153, 255";
   return { hasClass, hasColor };
 };
+
+module.exports.waitForClassAdded = async driver =>
+  driver.wait(async() => {
+    const { hasClass } = await module.exports.testAnimation(driver);
+    return hasClass;
+  }, 2000);
 
 module.exports.waitForAnimationEnd = async driver =>
   driver.wait(async() => {
