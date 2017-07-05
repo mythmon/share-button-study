@@ -54,7 +54,7 @@ describe("Example Add-on Functional Tests", function() {
     assert(clipboardy.readSync() === testText);
     // wait for the animation to end so that subsequent tests are
     // not impacted
-    await utils.waitForAnimation(driver);
+    await utils.waitForAnimationEnd(driver);
   });
 
   it("should have copy trigger the animation", async() => {
@@ -63,7 +63,7 @@ describe("Example Add-on Functional Tests", function() {
     assert(hasClass && hasColor);
     // wait for the animation to end so that subsequent tests are
     // not impacted
-    await utils.waitForAnimation(driver);
+    await utils.waitForAnimationEnd(driver);
   });
 
   it("should no longer trigger animation once uninstalled", async() => {

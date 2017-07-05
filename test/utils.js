@@ -67,14 +67,13 @@ module.exports.promiseSetupDriver = async() => {
   }
 };
 
-module.exports.addShareButton = async(driver) => {
-  await driver.executeAsyncScript((callback) => {
+module.exports.addShareButton = async driver =>
+  driver.executeAsyncScript((callback) => {
     // see https://dxr.mozilla.org/mozilla-central/source/browser/base/content/browser-social.js#193
     Components.utils.import("resource:///modules/CustomizableUI.jsm");
     CustomizableUI.addWidgetToArea("social-share-button", CustomizableUI.AREA_NAVBAR);
     callback();
   });
-};
 
 module.exports.installAddon = async(driver) => {
   // references:
@@ -132,8 +131,8 @@ module.exports.testAnimation = async(driver) => {
   return { hasClass, hasColor };
 };
 
-module.exports.waitForAnimation = async driver =>
+module.exports.waitForAnimationEnd = async driver =>
   driver.wait(async() => {
     const { hasClass, hasColor } = await module.exports.testAnimation(driver);
     return !hasClass && !hasColor;
-  });
+  }, 2000);

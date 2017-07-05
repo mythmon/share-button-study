@@ -22,6 +22,7 @@
     "eslint-plugin-import": "^2.5.0"
   },
   "scripts": {
+    "postinstall": "./bin/patch_webdriver.sh",
     "lint": "eslint .",
     "build": "./bin/make_xpi.sh",
     "test": "export FIREFOX_BINARY=firefox && npm run build && XPI_NAME=extension/share-button-study.xpi mocha test"
