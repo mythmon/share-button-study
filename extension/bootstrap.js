@@ -68,6 +68,7 @@ class BrowserWindow {
   get urlInput() {
     // Get the "DOM" elements
     const urlBar = this.window.document.getElementById("urlbar");
+    if (urlBar === null) { return null; }
     // XUL elements are different than regular children
     return this.window.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
   }
@@ -114,6 +115,10 @@ class BrowserWindow {
   }
 
   startup() {
+    // if there is no urlBar / urlInput, we don't want to do anything
+    // (ex. browser console window)
+    if (this.urlInput === null) return;
+
     browserWindowWeakMap.set(this.window, this);
 
     // The customizationending event represents exiting the "Customize..." menu from the toolbar.
