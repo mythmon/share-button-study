@@ -65,7 +65,7 @@ module.exports.promiseSetupDriver = async() => {
 
 module.exports.addShareButton = async driver =>
   driver.executeAsyncScript((callback) => {
-    // see https://dxr.mozilla.org/mozilla-central/source/browser/base/content/browser-social.js#193
+    // see https://dxr.mozilla.org/mozilla-central/rev/211d4dd61025c0a40caea7a54c9066e051bdde8c/browser/base/content/browser-social.js#193
     Components.utils.import("resource:///modules/CustomizableUI.jsm");
     CustomizableUI.addWidgetToArea("social-share-button", CustomizableUI.AREA_NAVBAR);
     callback();

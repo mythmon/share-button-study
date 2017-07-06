@@ -19,7 +19,7 @@ class CopyController {
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
       const shareButton = this.browserWindow.shareButton;
-      if (shareButton !== null) {
+      if (shareButton !== null && shareButton.attributes.getNamedItem("disabled") === null) {
         // TODO Change to "doorhanger" UI
         const panel = this.browserWindow.window.document.createElement("panel");
         const props = {
@@ -41,7 +41,7 @@ class CopyController {
         this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
 
         panel.openPopup(shareButton, "before_start", 0, 0, false, false);
-
+        
         // add the event listener to remove the css class when the animation ends
         shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
         shareButton.classList.add("social-share-button-on");
@@ -90,6 +90,7 @@ class BrowserWindow {
   get urlInput() {
     // Get the "DOM" elements
     const urlBar = this.window.document.getElementById("urlbar");
+    if (urlBar === null) { return null; }
     // XUL elements are different than regular children
     return this.window.document.getAnonymousElementByAttribute(urlBar, "anonid", "input");
   }
@@ -136,6 +137,10 @@ class BrowserWindow {
   }
 
   startup() {
+    // if there is no urlBar / urlInput, we don't want to do anything
+    // (ex. browser console window)
+    if (this.urlInput === null) return;
+
     browserWindowWeakMap.set(this.window, this);
 
     // The customizationending event represents exiting the "Customize..." menu from the toolbar.

@@ -4,10 +4,9 @@ const assert = require("assert");
 const utils = require("./utils");
 const clipboardy = require("clipboardy");
 // const webdriver = require("selenium-webdriver");
+const firefox = require("selenium-webdriver/firefox");
 
-// TODO these may be useful for more complex tests
-// const firefox = require("selenium-webdriver/firefox");
-// const Context = firefox.Context;
+const Context = firefox.Context;
 
 // TODO create new profile per test?
 // then we can test with a clean profile every time
@@ -48,23 +47,38 @@ describe("Add-on Functional Tests", function() {
     // value will be different unless we pass in a URL text at
     // the start
     const testText = "about:test";
+
+    // write dummy value just in case testText is already in clipboard
+    await clipboardy.write("foobar");
     await utils.copyUrlBar(driver);
-    assert(clipboardy.readSync() === testText);
-    // wait for the animation to end so that subsequent tests are
-    // not impacted
+    const clipboard = await clipboardy.read();
+    assert(clipboard === testText);
+  });
+
+  it("animation should not trigger on disabled page", async() => {
+    // navigate to a disabled page
+    driver.setContext(Context.CONTENT);
+    await driver.get("about:blank");
+    driver.setContext(Context.CHROME);
+
+    await utils.copyUrlBar(driver);
+    const { hasClass, hasColor } = await utils.testAnimation(driver);
+    assert(!hasClass && !hasColor);
+  });
+
+  it("animation should trigger on regular page", async() => {
+    // navigate to a disabled page
+    driver.setContext(Context.CONTENT);
+    await driver.get("http://mozilla.org");
+    driver.setContext(Context.CHROME);
+
+    await utils.copyUrlBar(driver);
+    const { hasClass, hasColor } = await utils.testAnimation(driver);
+    assert(hasClass && hasColor);
+    // wait for the animation to end before running subsequent tests
     await utils.waitForAnimationEnd(driver);
   });
 
-  it("should have copy trigger the animation", async() => {
-    await utils.copyUrlBar(driver);
-    // wait for class to be added to button
-    await utils.waitForClassAdded(driver);
-    const { hasClass, hasColor } = await utils.testAnimation(driver);
-    assert(hasClass && hasColor);
-    // wait for the animation to end so that subsequent tests are
-    // not impacted
-    await utils.waitForAnimationEnd(driver);
-  });
 
   it("should no longer trigger animation once uninstalled", async() => {
     await utils.uninstallAddon(driver, addonId);
