@@ -125,7 +125,7 @@ module.exports.testAnimation = async(driver) => {
 
   const hasClass = buttonClassString.split(" ").includes("social-share-button-on");
   const hasColor = buttonColor.includes("43, 153, 255");
-  return { hasClass: hasClass === true, hasColor: hasColor === true };
+  return { hasClass, hasColor };
 };
 
 module.exports.waitForClassAdded = async driver =>
