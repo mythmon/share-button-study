@@ -23,7 +23,7 @@ describe("Add-on Functional Tests", function() {
     driver = await utils.promiseSetupDriver();
   });
 
-  after(() => driver.quit());
+  //after(() => driver.quit());
 
   it("should have a URL bar", async() => {
     const urlBar = await utils.promiseUrlBar(driver);
