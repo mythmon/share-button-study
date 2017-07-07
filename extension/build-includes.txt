@@ -2,3 +2,5 @@ bootstrap.js
 chrome.manifest
 install.rdf
 share_button.css
+doorhanger.html
+share.svg

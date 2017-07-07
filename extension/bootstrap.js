@@ -21,30 +21,32 @@ class CopyController {
       const shareButton = this.browserWindow.shareButton;
       if (shareButton !== null && shareButton.attributes.getNamedItem("disabled") === null) {
         // TODO Change to "doorhanger" UI
-        const findPanel = this.browserWindow.window.document.getElementById("share-button-panel");
-        if (findPanel === null || findPanel.state === "closed") {
-          const panel = this.browserWindow.window.document.createElement("panel");
+        let panel = this.browserWindow.window.document.getElementById("share-button-panel");
+        if (panel === null) {
+          panel = this.browserWindow.window.document.createElement("panel");
           const props = {
             id: "share-button-panel",
             type: "arrow",
             noautofocus: true,
             level: "parent",
-            style: "width:300px; height:100px;",
+            style: "width:400px; height:100px;",
           };
           Object.keys(props).forEach((key, index) => {
             if (Object.prototype.hasOwnProperty.call(props, key)) {
               panel.setAttribute(key, props[key]);
             }
           });
-          const iframe = this.browserWindow.window.document.createElement("iframe");
+          const iframe = this.browserWindow.window.document.createElement("browser");
           iframe.setAttribute("id", "share-button-doorhanger");
           iframe.setAttribute("src", "resource://share-button-study/doorhanger.html");
-          iframe.setAttribute("style", "width:300px; height:50px;");
+          iframe.setAttribute("type", "content");
+          iframe.setAttribute("context", "contentAreaContextMenu");
+          iframe.setAttribute("disableglobalhistory", "true");
+          iframe.setAttribute("flex", "1");
           panel.appendChild(iframe);
           this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
-
-          panel.openPopup(shareButton, "before_start", 0, 0, false, false);
         }
+        panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
         // add the event listener to remove the css class when the animation ends
         shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
         shareButton.classList.add("social-share-button-on");
