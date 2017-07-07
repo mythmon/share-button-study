@@ -91,8 +91,8 @@ describe("Add-on Functional Tests", function() {
     driver.setContext(Context.CHROME);
 
     await utils.copyUrlBar(driver);
-    const panelState = await utils.testPanel(driver);
-    assert(panelState === "showing");
+    const panelOpened = await utils.testPanel(driver);
+    assert(panelOpened);
   });
 
   it("should no longer trigger animation once uninstalled", async() => {
