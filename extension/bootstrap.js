@@ -47,7 +47,6 @@ class CopyController {
           panel.appendChild(iframe);
           this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
         }
-        // open the panel
         panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
 
         // add the event listener to remove the css class when the animation ends

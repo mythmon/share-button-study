@@ -134,6 +134,7 @@ module.exports.testAnimation = async(driver) => {
   return { hasClass, hasColor };
 };
 
+// FIXME waitForClassAdded is no longer being used?
 module.exports.waitForClassAdded = async driver =>
   driver.wait(async() => {
     const { hasClass } = await module.exports.testAnimation(driver);
@@ -149,12 +150,14 @@ module.exports.waitForAnimationEnd = async driver =>
 module.exports.testPanel = async(driver) => {
   driver.setContext(Context.CHROME);
   try { // if we can't find the panel, return false
-    const panel = await driver.wait(until.elementLocated(
-      By.id("share-button-panel")), 2000);
-    const panelHidden = await panel.getAttribute("animate");
-    return panelHidden === "open";
+    // TODO execute JS, since state is not an HTML attribute, it's a property
+    const panelState = await driver.executeAsyncScript((callback) => {
+      const state = window.document.getElementById("share-button-panel").state;
+      callback(state);
+    });
+    return panelState;
   } catch (e) {
-    return false;
+    return null;
   }
 };
 

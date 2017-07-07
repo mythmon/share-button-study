@@ -13,7 +13,7 @@ const Context = firefox.Context;
 
 describe("Add-on Functional Tests", function() {
   // This gives Firefox time to start, and us a bit longer during some of the tests.
-  this.timeout(10000);
+  this.timeout(15000);
 
   let driver;
   let addonId;
@@ -27,7 +27,7 @@ describe("Add-on Functional Tests", function() {
   afterEach(async() => {
     // wait for the animation to end before running subsequent tests
     await utils.waitForAnimationEnd(driver);
-    // TODO close the popup
+    // close the popup
     await utils.closePanel(driver);
   });
 
@@ -91,7 +91,8 @@ describe("Add-on Functional Tests", function() {
     driver.setContext(Context.CHROME);
 
     await utils.copyUrlBar(driver);
-    assert(await utils.testPanel(driver));
+    const panelState = await utils.testPanel(driver);
+    assert(panelState === "showing");
   });
 
   it("should no longer trigger animation once uninstalled", async() => {
