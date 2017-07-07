@@ -24,6 +24,13 @@ describe("Add-on Functional Tests", function() {
 
   after(() => driver.quit());
 
+  afterEach(async() => {
+    // wait for the animation to end before running subsequent tests
+    await utils.waitForAnimationEnd(driver);
+    // TODO close the popup
+    await utils.closePanel(driver);
+  });
+
   it("should have a URL bar", async() => {
     const urlBar = await utils.promiseUrlBar(driver);
     const text = await urlBar.getAttribute("placeholder");
@@ -67,7 +74,7 @@ describe("Add-on Functional Tests", function() {
   });
 
   it("animation should trigger on regular page", async() => {
-    // navigate to a disabled page
+    // navigate to a regular page
     driver.setContext(Context.CONTENT);
     await driver.get("http://mozilla.org");
     driver.setContext(Context.CHROME);
@@ -75,15 +82,28 @@ describe("Add-on Functional Tests", function() {
     await utils.copyUrlBar(driver);
     const { hasClass, hasColor } = await utils.testAnimation(driver);
     assert(hasClass && hasColor);
-    // wait for the animation to end before running subsequent tests
-    await utils.waitForAnimationEnd(driver);
   });
 
+  it("popup should trigger on regular page", async() => {
+    // navigate to a regular page
+    driver.setContext(Context.CONTENT);
+    await driver.get("http://mozilla.org");
+    driver.setContext(Context.CHROME);
+
+    await utils.copyUrlBar(driver);
+    assert(await utils.testPanel(driver));
+  });
 
   it("should no longer trigger animation once uninstalled", async() => {
     await utils.uninstallAddon(driver, addonId);
     await utils.copyUrlBar(driver);
     const { hasClass, hasColor } = await utils.testAnimation(driver);
     assert(!hasClass && !hasColor);
+  });
+
+  it("should no longer trigger popup once uninstalled", async() => {
+    await utils.copyUrlBar(driver);
+    await utils.copyUrlBar(driver);
+    assert(!(await utils.testPanel(driver)));
   });
 });

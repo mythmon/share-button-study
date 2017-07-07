@@ -1,7 +1,6 @@
 /* eslint-env node */
 // The geckodriver package downloads and installs geckodriver for us.
 // We use it by requiring it.
-
 require("geckodriver");
 const cmd = require("selenium-webdriver/lib/command");
 const firefox = require("selenium-webdriver/firefox");
@@ -95,10 +94,16 @@ module.exports.uninstallAddon = async(driver, id) => {
   await executor.execute(uninstallCmd);
 };
 
-module.exports.promiseAddonButton = (driver) => {
+module.exports.promiseAddonButton = async(driver) => {
   driver.setContext(Context.CHROME);
-  return driver.wait(until.elementLocated(
-    By.id("social-share-button")), 1000);
+  try {
+    return await driver.wait(until.elementLocated(
+      By.id("social-share-button")), 1000);
+  } catch (e) {
+    // if there an error, the button was not found
+    // so return null
+    return null;
+  }
 };
 
 module.exports.promiseUrlBar = (driver) => {
@@ -119,6 +124,7 @@ module.exports.copyUrlBar = async(driver) => {
 
 module.exports.testAnimation = async(driver) => {
   const button = await module.exports.promiseAddonButton(driver);
+  if (button === null) { return { hasClass: false, hasColor: false }; }
 
   const buttonClassString = await button.getAttribute("class");
   const buttonColor = await button.getCssValue("background-color");
@@ -139,3 +145,20 @@ module.exports.waitForAnimationEnd = async driver =>
     const { hasClass, hasColor } = await module.exports.testAnimation(driver);
     return !hasClass && !hasColor;
   }, 2000);
+
+module.exports.testPanel = async(driver) => {
+  driver.setContext(Context.CHROME);
+  try { // if we can't find the panel, return false
+    const panel = await driver.wait(until.elementLocated(
+      By.id("share-button-panel")), 2000);
+    const panelHidden = await panel.getAttribute("animate");
+    return panelHidden === "open";
+  } catch (e) {
+    return false;
+  }
+};
+
+module.exports.closePanel = async(driver) => {
+  const urlbar = await module.exports.promiseUrlBar(driver);
+  await urlbar.sendKeys(webdriver.Key.ESCAPE);
+};

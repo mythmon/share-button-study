@@ -20,9 +20,8 @@ class CopyController {
     if (cmd === "cmd_copy") {
       const shareButton = this.browserWindow.shareButton;
       if (shareButton !== null && shareButton.attributes.getNamedItem("disabled") === null) {
-        // TODO Change to "doorhanger" UI
         let panel = this.browserWindow.window.document.getElementById("share-button-panel");
-        if (panel === null) {
+        if (panel === null) { // create the panel
           panel = this.browserWindow.window.document.createElement("panel");
           const props = {
             id: "share-button-panel",
@@ -36,6 +35,7 @@ class CopyController {
               panel.setAttribute(key, props[key]);
             }
           });
+
           const iframe = this.browserWindow.window.document.createElement("browser");
           iframe.setAttribute("id", "share-button-doorhanger");
           iframe.setAttribute("src", "resource://share-button-study/doorhanger.html");
@@ -43,10 +43,13 @@ class CopyController {
           iframe.setAttribute("context", "contentAreaContextMenu");
           iframe.setAttribute("disableglobalhistory", "true");
           iframe.setAttribute("flex", "1");
+
           panel.appendChild(iframe);
           this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
         }
+        // open the panel
         panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
+
         // add the event listener to remove the css class when the animation ends
         shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
         shareButton.classList.add("social-share-button-on");
@@ -170,6 +173,12 @@ class BrowserWindow {
 
     // Remove the copy controller
     this.removeCopyController();
+
+    // Remove the share-button-panel
+    const sharePanel = this.window.document.getElementById("share-button-panel");
+    if (sharePanel !== null) {
+      sharePanel.remove();
+    }
 
     // Remove modifications to shareButton (modified in CopyController)
     if (this.shareButton !== null) {
