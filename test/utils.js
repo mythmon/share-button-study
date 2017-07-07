@@ -150,12 +150,16 @@ module.exports.waitForAnimationEnd = async driver =>
 module.exports.testPanel = async(driver) => {
   driver.setContext(Context.CHROME);
   try { // if we can't find the panel, return false
-    // FIXME inconsistent test results...
     return await driver.wait(async() => {
       // need to execute JS, since state is not an HTML attribute, it's a property
       const panelState = await driver.executeAsyncScript((callback) => {
-        const state = window.document.getElementById("share-button-panel").state;
-        callback(state);
+        const shareButtonPanel = window.document.getElementById("share-button-panel");
+        if (shareButtonPanel === null) {
+          callback(false);
+        } else {
+          const state = shareButtonPanel.state;
+          callback(state);
+        }
       });
       return panelState === "showing" || panelState === "open";
     }, 2000);
