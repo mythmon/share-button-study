@@ -1,0 +1,28 @@
+@import url("chrome://global/skin/in-content/common.css");
+@import url("chrome://global/skin/popup.css");
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-y: hidden;
+    background-image: linear-gradient(hsla(0,0%,99%,1), hsla(0,0%,99%,.975) 10%, hsla(0,0%,98%,.975)) !important;
+    height: 125px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  max-width: 500px;
+  padding: 8px;
+  grid-gap: 8px;
+}
+
+.icon {
+  width: 100%
+}
+
+.only-once {
+  grid-column: 2;
+}
