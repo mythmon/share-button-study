@@ -36,14 +36,14 @@ class CopyController {
             }
           });
 
-          const iframe = this.browserWindow.window.document.createElement("browser");
-          iframe.setAttribute("id", "share-button-doorhanger");
-          iframe.setAttribute("src", "resource://share-button-study/doorhanger.html");
-          iframe.setAttribute("type", "content");
-          iframe.setAttribute("disableglobalhistory", "true");
-          iframe.setAttribute("flex", "1");
+          const embeddedBrowser = this.browserWindow.window.document.createElement("browser");
+          embeddedBrowser.setAttribute("id", "share-button-doorhanger");
+          embeddedBrowser.setAttribute("src", "resource://share-button-study/doorhanger.html");
+          embeddedBrowser.setAttribute("type", "content");
+          embeddedBrowser.setAttribute("disableglobalhistory", "true");
+          embeddedBrowser.setAttribute("flex", "1");
 
-          panel.appendChild(iframe);
+          panel.appendChild(embeddedBrowser);
           this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
         }
         panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
