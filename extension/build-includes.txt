@@ -3,4 +3,5 @@ chrome.manifest
 install.rdf
 share_button.css
 doorhanger.html
+doorhanger.css
 share.svg

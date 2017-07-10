@@ -28,7 +28,7 @@ class CopyController {
             type: "arrow",
             noautofocus: true,
             level: "parent",
-            style: "width:400px; height:100px;",
+            style: "width:400px; height:125px;",
           };
           Object.keys(props).forEach((key, index) => {
             if (Object.prototype.hasOwnProperty.call(props, key)) {
@@ -40,7 +40,6 @@ class CopyController {
           iframe.setAttribute("id", "share-button-doorhanger");
           iframe.setAttribute("src", "resource://share-button-study/doorhanger.html");
           iframe.setAttribute("type", "content");
-          iframe.setAttribute("context", "contentAreaContextMenu");
           iframe.setAttribute("disableglobalhistory", "true");
           iframe.setAttribute("flex", "1");
 
