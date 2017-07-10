@@ -3,7 +3,8 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/Console.jsm");
 Cu.import("resource://gre/modules/AppConstants.jsm");
 
-const CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
+const SHAREBUTTON_CSS_URI = Services.io.newURI("resource://share-button-study/share_button.css");
+const PANEL_CSS_URI = Services.io.newURI("resource://share-button-study/panel.css");
 const browserWindowWeakMap = new WeakMap();
 
 class CopyController {
@@ -28,7 +29,7 @@ class CopyController {
             type: "arrow",
             noautofocus: true,
             level: "parent",
-            style: "width:400px; height:125px;",
+            style: "width:400px; height:80px;",
           };
           Object.keys(props).forEach((key, index) => {
             if (Object.prototype.hasOwnProperty.call(props, key)) {
@@ -133,13 +134,15 @@ class BrowserWindow {
   insertCSS() {
     const utils = this.window.QueryInterface(Ci.nsIInterfaceRequestor)
       .getInterface(Ci.nsIDOMWindowUtils);
-    utils.loadSheet(CSS_URI, utils.AGENT_SHEET);
+    utils.loadSheet(SHAREBUTTON_CSS_URI, utils.AGENT_SHEET);
+    utils.loadSheet(PANEL_CSS_URI, utils.AGENT_SHEET);
   }
 
   removeCSS() {
     const utils = this.window.QueryInterface(Ci.nsIInterfaceRequestor)
       .getInterface(Ci.nsIDOMWindowUtils);
-    utils.removeSheet(CSS_URI, utils.AGENT_SHEET);
+    utils.removeSheet(SHAREBUTTON_CSS_URI, utils.AGENT_SHEET);
+    utils.removeSheet(PANEL_CSS_URI, utils.AGENT_SHEET);
   }
 
   startup() {

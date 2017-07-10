@@ -4,4 +4,5 @@ install.rdf
 share_button.css
 doorhanger.html
 doorhanger.css
+panel.css
 share.svg
