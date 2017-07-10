@@ -29,7 +29,7 @@ class CopyController {
             type: "arrow",
             noautofocus: true,
             level: "parent",
-            style: "width:400px; height:80px;",
+            style: "width:400px; height:96px;",
           };
           Object.keys(props).forEach((key, index) => {
             if (Object.prototype.hasOwnProperty.call(props, key)) {

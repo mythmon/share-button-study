@@ -6,7 +6,8 @@
 
 html {
     overflow-y: hidden;
-    height: 80px;
+    height: 96px;
+    padding: 8px;
 }
 
 .grid {
