@@ -7,10 +7,53 @@ const SHAREBUTTON_CSS_URI = Services.io.newURI("resource://share-button-study/sh
 const PANEL_CSS_URI = Services.io.newURI("resource://share-button-study/panel.css");
 const browserWindowWeakMap = new WeakMap();
 
+function doorhangerTreatment(browserWindow, shareButton) {
+  let panel = browserWindow.window.document.getElementById("share-button-panel");
+  if (panel === null) { // create the panel
+    panel = browserWindow.window.document.createElement("panel");
+    const props = {
+      id: "share-button-panel",
+      type: "arrow",
+      noautofocus: true,
+      level: "parent",
+      style: "width:400px; height:96px;",
+    };
+    Object.keys(props).forEach((key, index) => {
+      if (Object.prototype.hasOwnProperty.call(props, key)) {
+        panel.setAttribute(key, props[key]);
+      }
+    });
+
+    const embeddedBrowser = browserWindow.window.document.createElement("browser");
+    embeddedBrowser.setAttribute("id", "share-button-doorhanger");
+    embeddedBrowser.setAttribute("src", "resource://share-button-study/doorhanger.html");
+    embeddedBrowser.setAttribute("type", "content");
+    embeddedBrowser.setAttribute("disableglobalhistory", "true");
+    embeddedBrowser.setAttribute("flex", "1");
+
+    panel.appendChild(embeddedBrowser);
+    browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
+  }
+  panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
+}
+
+function highlightTreatment(browserWindow, shareButton) {
+  // add the event listener to remove the css class when the animation ends
+  shareButton.addEventListener("animationend", browserWindow.animationEndListener);
+  shareButton.classList.add("social-share-button-on");
+}
+
+// define treatments as STRING: fn(browserWindow, shareButton)
+const TREATMENTS = {
+  DOORHANGER: doorhangerTreatment,
+  HIGHLIGHT: highlightTreatment,
+};
+
 class CopyController {
   // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Property/controllers
   constructor(browserWindow) {
     this.browserWindow = browserWindow;
+    this.treatment = "ALL";
   }
 
   supportsCommand(cmd) { return cmd === "cmd_copy" || cmd === "share-button-study"; }
@@ -20,38 +63,17 @@ class CopyController {
   doCommand(cmd) {
     if (cmd === "cmd_copy") {
       const shareButton = this.browserWindow.shareButton;
+      // if the shareButton is added to the toolbar and the current page can be shared
       if (shareButton !== null && shareButton.attributes.getNamedItem("disabled") === null) {
-        let panel = this.browserWindow.window.document.getElementById("share-button-panel");
-        if (panel === null) { // create the panel
-          panel = this.browserWindow.window.document.createElement("panel");
-          const props = {
-            id: "share-button-panel",
-            type: "arrow",
-            noautofocus: true,
-            level: "parent",
-            style: "width:400px; height:96px;",
-          };
-          Object.keys(props).forEach((key, index) => {
-            if (Object.prototype.hasOwnProperty.call(props, key)) {
-              panel.setAttribute(key, props[key]);
+        if (this.treatment === "ALL") {
+          Object.keys(TREATMENTS).forEach((key, index) => {
+            if (Object.prototype.hasOwnProperty.call(TREATMENTS, key)) {
+              TREATMENTS[key](this.browserWindow, shareButton);
             }
           });
-
-          const embeddedBrowser = this.browserWindow.window.document.createElement("browser");
-          embeddedBrowser.setAttribute("id", "share-button-doorhanger");
-          embeddedBrowser.setAttribute("src", "resource://share-button-study/doorhanger.html");
-          embeddedBrowser.setAttribute("type", "content");
-          embeddedBrowser.setAttribute("disableglobalhistory", "true");
-          embeddedBrowser.setAttribute("flex", "1");
-
-          panel.appendChild(embeddedBrowser);
-          this.browserWindow.window.document.getElementById("mainPopupSet").appendChild(panel);
+        } else {
+          TREATMENTS[this.treatment](this.browserWindow, shareButton);
         }
-        panel.openPopup(shareButton, "bottomcenter topright", 0, 0, false, false);
-
-        // add the event listener to remove the css class when the animation ends
-        shareButton.addEventListener("animationend", this.browserWindow.animationEndListener);
-        shareButton.classList.add("social-share-button-on");
       }
     }
     // Iterate over all other controllers and call doCommand on the first controller
