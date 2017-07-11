@@ -155,7 +155,7 @@ module.exports.testPanel = async(driver) => {
       const panelState = await driver.executeAsyncScript((callback) => {
         const shareButtonPanel = window.document.getElementById("share-button-panel");
         if (shareButtonPanel === null) {
-          callback(false);
+          callback(null);
         } else {
           const state = shareButtonPanel.state;
           callback(state);
