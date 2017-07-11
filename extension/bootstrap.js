@@ -11,18 +11,10 @@ function doorhangerTreatment(browserWindow, shareButton) {
   let panel = browserWindow.window.document.getElementById("share-button-panel");
   if (panel === null) { // create the panel
     panel = browserWindow.window.document.createElement("panel");
-    const props = {
-      id: "share-button-panel",
-      type: "arrow",
-      noautofocus: true,
-      level: "parent",
-      style: "width:400px; height:96px;",
-    };
-    Object.keys(props).forEach((key, index) => {
-      if (Object.prototype.hasOwnProperty.call(props, key)) {
-        panel.setAttribute(key, props[key]);
-      }
-    });
+    panel.setAttribute("id", "share-button-panel");
+    panel.setAttribute("type", "arrow");
+    panel.setAttribute("noautofocus", true);
+    panel.setAttribute("level", "parent");
 
     const embeddedBrowser = browserWindow.window.document.createElement("browser");
     embeddedBrowser.setAttribute("id", "share-button-doorhanger");
