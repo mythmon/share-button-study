@@ -162,9 +162,10 @@ module.exports.testPanel = async(driver) => {
         }
       });
       return panelState === "showing" || panelState === "open";
-    }, 2000);
+    }, 3000);
   } catch (e) {
-    return null;
+    if (e.name === "TimeoutError") { return null; }
+    throw e;
   }
 };
 
