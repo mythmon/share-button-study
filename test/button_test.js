@@ -3,7 +3,6 @@
 const assert = require("assert");
 const utils = require("./utils");
 const clipboardy = require("clipboardy");
-// const webdriver = require("selenium-webdriver");
 const firefox = require("selenium-webdriver/firefox");
 
 const Context = firefox.Context;
@@ -103,7 +102,6 @@ describe("Add-on Functional Tests", function() {
   });
 
   it("should no longer trigger popup once uninstalled", async() => {
-    await utils.copyUrlBar(driver);
     await utils.copyUrlBar(driver);
     assert(!(await utils.testPanel(driver)));
   });
