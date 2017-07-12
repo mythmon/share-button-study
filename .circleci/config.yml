@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: marcrowo/share-button-study:1
+      - image: marcrowo/share-button-study-base:1
 
     working_directory: /share-button-study
 
