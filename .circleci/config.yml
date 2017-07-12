@@ -2,17 +2,27 @@ version: 2
 jobs:
   build:
     docker:
-      - image: marcrowo/share-button-study-base:2
+      - image: marcrowo/share-button-study-base:3
 
     working_directory: /share-button-study
 
     steps:
       - checkout
 
+      - restore_cache:
+          key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
+
       - run:
           name: xvfb
           command: Xvfb :10 -ac
           background: true
+
+      - run: yarn install
+
+      - save_cache:
+          key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - "/home/ubuntu/.yarn-cache"
 
       - run:
           name: Lint
