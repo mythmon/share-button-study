@@ -4,7 +4,7 @@
 require("geckodriver");
 const cmd = require("selenium-webdriver/lib/command");
 const firefox = require("selenium-webdriver/firefox");
-const Fs = require("fs-promise");
+const Fs = require("fs-extra");
 const FxRunnerUtils = require("fx-runner/lib/utils");
 const path = require("path");
 const webdriver = require("selenium-webdriver");
@@ -168,6 +168,13 @@ module.exports.testPanel = async(driver) => {
     return panelStates;
   } catch (e) {
     if (e.name === "TimeoutError") {
+      const data = await driver.takesScreenshot();
+      try {
+        await Fs.outputFile("./panel-state-screenshot.png",
+          data, "base64");
+      } catch (screenshotError) {
+        console.log(screenshotError.msg);
+      }
       return panelStates;
     }
     throw e;
