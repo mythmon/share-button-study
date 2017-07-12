@@ -19,6 +19,10 @@ describe("Add-on Functional Tests", function() {
 
   before(async() => {
     driver = await utils.promiseSetupDriver();
+    // install the addon
+    addonId = await utils.installAddon(driver);
+    // add the share-button to the toolbar
+    await utils.addShareButton(driver);
   });
 
   after(() => driver.quit());
@@ -37,11 +41,6 @@ describe("Add-on Functional Tests", function() {
   });
 
   it("should have a toolbar button", async() => {
-    // add the share-button to the toolbar
-    await utils.addShareButton(driver);
-    // install the addon
-    addonId = await utils.installAddon(driver);
-
     const button = await utils.promiseAddonButton(driver);
     const text = await button.getAttribute("tooltiptext");
     assert.equal(text, "Share this page");
