@@ -3,6 +3,8 @@ jobs:
   build:
     docker:
       - image: marcrowo/share-button-study-base:4
+        environment:
+          DISPLAY: :10
 
     working_directory: /share-button-study
 
@@ -14,7 +16,7 @@ jobs:
 
       - run:
           name: xvfb
-          command: Xvfb :10 -ac
+          command: Xvfb $DISPLAY -ac
           background: true
 
       - run:
@@ -39,9 +41,7 @@ jobs:
   
       - run:
           name: Functional tests
-          command: |
-            export DISPLAY=:10
-            npm run test
+          command: npm run test
 
       - store_artifacts:
           path: "extension/share-button-study.xpi"
