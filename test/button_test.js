@@ -91,7 +91,9 @@ describe("Add-on Functional Tests", function() {
 
     await utils.copyUrlBar(driver);
     const panelStates = await utils.testPanel(driver);
-    console.log(panelStates);
+    for (const state of panelStates) {
+      console.log(state);
+    }
     assert(panelStates.includes("showing") || panelStates.includes("open"));
   });
 

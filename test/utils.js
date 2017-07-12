@@ -149,8 +149,8 @@ module.exports.waitForAnimationEnd = async driver =>
 
 module.exports.testPanel = async(driver) => {
   driver.setContext(Context.CHROME);
+  const panelStates = [];
   try { // if we can't find the panel, return false
-    const panelStates = [];
     await driver.wait(async() => {
       // need to execute JS, since state is not an HTML attribute, it's a property
       const panelState = await driver.executeAsyncScript((callback) => {
@@ -167,7 +167,9 @@ module.exports.testPanel = async(driver) => {
     }, 3000);
     return panelStates;
   } catch (e) {
-    if (e.name === "TimeoutError") { return null; }
+    if (e.name === "TimeoutError") {
+      return panelStates;
+    }
     throw e;
   }
 };
