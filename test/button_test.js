@@ -102,8 +102,8 @@ describe("Add-on Functional Tests", function() {
     assert(!hasClass && !hasColor);
   });
 
-  /*it("should no longer trigger popup once uninstalled", async() => {
+  /* it("should no longer trigger popup once uninstalled", async() => {
     await utils.copyUrlBar(driver);
     assert(!(await utils.testPanel(driver)));
-  });*/
+  }); */
 });
