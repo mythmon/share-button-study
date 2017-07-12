@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: marcrowo/share-button-study-base:3
+      - image: marcrowo/share-button-study-base:4
 
     working_directory: /share-button-study
 
@@ -15,6 +15,11 @@ jobs:
       - run:
           name: xvfb
           command: Xvfb :10 -ac
+          background: true
+
+      - run:
+          name: openbox
+          command: openbox
           background: true
 
       - run: yarn install
