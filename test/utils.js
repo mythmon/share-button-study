@@ -150,7 +150,7 @@ module.exports.waitForAnimationEnd = async driver =>
 module.exports.takeScreenshot = async(driver) => {
   try {
     const data = await driver.takeScreenshot();
-    return await Fs.outputFile("./panel-state-screenshot.png",
+    return await Fs.outputFile("./screenshot.png",
       data, "base64");
   } catch (screenshotError) {
     throw screenshotError;
@@ -159,9 +159,8 @@ module.exports.takeScreenshot = async(driver) => {
 
 module.exports.testPanel = async(driver) => {
   driver.setContext(Context.CHROME);
-  const panelStates = [];
   try { // if we can't find the panel, return false
-    await driver.wait(async() => {
+    return await driver.wait(async() => {
       // need to execute JS, since state is not an HTML attribute, it's a property
       const panelState = await driver.executeAsyncScript((callback) => {
         const shareButtonPanel = window.document.getElementById("share-button-panel");
@@ -172,14 +171,10 @@ module.exports.testPanel = async(driver) => {
           callback(state);
         }
       });
-      panelStates.push(panelState);
       return panelState === "open";
     }, 3000);
-    return panelStates;
   } catch (e) {
-    if (e.name === "TimeoutError") {
-      return panelStates;
-    }
+    if (e.name === "TimeoutError") { return null; }
     throw e;
   }
 };

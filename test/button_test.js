@@ -89,14 +89,8 @@ describe("Add-on Functional Tests", function() {
     driver.setContext(Context.CHROME);
 
     await utils.copyUrlBar(driver);
-    const panelStates = await utils.testPanel(driver);
-    for (const state of panelStates) {
-      console.log(state);
-    }
-
-    await utils.takeScreenshot(driver);
-
-    assert(panelStates.includes("showing") || panelStates.includes("open"));
+    const panelOpened = await utils.testPanel(driver);
+    assert(panelOpened);
   });
 
   it("should no longer trigger animation once uninstalled", async() => {
@@ -106,8 +100,8 @@ describe("Add-on Functional Tests", function() {
     assert(!hasClass && !hasColor);
   });
 
-  /* it("should no longer trigger popup once uninstalled", async() => {
+  it("should no longer trigger popup once uninstalled", async() => {
     await utils.copyUrlBar(driver);
     assert(!(await utils.testPanel(driver)));
-  }); */
+  });
 });
