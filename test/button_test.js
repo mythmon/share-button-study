@@ -85,7 +85,7 @@ describe("Add-on Functional Tests", function() {
   it("popup should trigger on regular page", async() => {
     // navigate to a regular page
     driver.setContext(Context.CONTENT);
-    await driver.get("http://mozilla.org");
+    await driver.get("http://github.com/mozilla");
     driver.setContext(Context.CHROME);
 
     await utils.copyUrlBar(driver);
@@ -93,6 +93,9 @@ describe("Add-on Functional Tests", function() {
     for (const state of panelStates) {
       console.log(state);
     }
+
+    await utils.takeScreenshot(driver);
+
     assert(panelStates.includes("showing") || panelStates.includes("open"));
   });
 

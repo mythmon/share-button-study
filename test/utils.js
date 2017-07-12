@@ -150,7 +150,7 @@ module.exports.waitForAnimationEnd = async driver =>
 module.exports.takeScreenshot = async(driver) => {
   try {
     const data = await driver.takeScreenshot();
-    await Fs.outputFile("./panel-state-screenshot.png",
+    return await Fs.outputFile("./panel-state-screenshot.png",
       data, "base64");
   } catch (screenshotError) {
     throw screenshotError;
@@ -172,14 +172,12 @@ module.exports.testPanel = async(driver) => {
           callback(state);
         }
       });
-      module.exports.takeScreenshot(driver);
       panelStates.push(panelState);
-      return panelState === "showing" || panelState === "open";
+      return panelState === "open";
     }, 3000);
     return panelStates;
   } catch (e) {
     if (e.name === "TimeoutError") {
-      module.exports.takeScreenshot(driver);
       return panelStates;
     }
     throw e;
