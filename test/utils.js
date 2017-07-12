@@ -147,6 +147,16 @@ module.exports.waitForAnimationEnd = async driver =>
     return !hasClass && !hasColor;
   }, 2000);
 
+module.exports.takeScreenshot = async(driver) => {
+  try {
+    const data = await driver.takeScreenshot();
+    await Fs.outputFile("./panel-state-screenshot.png",
+      data, "base64");
+  } catch (screenshotError) {
+    throw screenshotError;
+  }
+};
+
 module.exports.testPanel = async(driver) => {
   driver.setContext(Context.CHROME);
   const panelStates = [];
@@ -162,19 +172,14 @@ module.exports.testPanel = async(driver) => {
           callback(state);
         }
       });
+      module.exports.takeScreenshot(driver);
       panelStates.push(panelState);
       return panelState === "showing" || panelState === "open";
     }, 3000);
     return panelStates;
   } catch (e) {
     if (e.name === "TimeoutError") {
-      const data = await driver.takesScreenshot();
-      try {
-        await Fs.outputFile("./panel-state-screenshot.png",
-          data, "base64");
-      } catch (screenshotError) {
-        console.log(screenshotError.msg);
-      }
+      module.exports.takeScreenshot(driver);
       return panelStates;
     }
     throw e;
