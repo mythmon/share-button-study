@@ -15,8 +15,8 @@ jobs:
           key: projectname-{{ .Branch }}-{{ checksum "yarn.lock" }}
 
       - run:
-          name: xvfb
-          command: Xvfb $DISPLAY -ac
+          name: Set up window manager
+          command: Xvfb $DISPLAY -ac && openbox
           background: true
 
       - run:
